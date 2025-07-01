@@ -4,6 +4,7 @@ use Livewire\Volt\Component;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 new class extends Component {
     public $search = '';
@@ -67,6 +68,8 @@ new class extends Component {
             $roles = Role::whereIn('id', $this->selectedRoles)->get();
             $roleNames = $roles->pluck('name')->toArray();
             $staff->syncRoles($roleNames);
+
+            $staff->sendEmailVerificationNotification();
 
             session()->flash('success', 'Staff member created successfully.');
         }
