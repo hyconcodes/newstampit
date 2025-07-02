@@ -36,7 +36,16 @@ new class extends Component {
     {
         $this->validate([
             'name' => 'required|min:3',
-            'email' => 'required|email|unique:users,email'.($this->editingStaffId ? ','.$this->editingStaffId : ''),
+            'email' => [
+                'required',
+                'email',
+                'unique:users,email'.($this->editingStaffId ? ','.$this->editingStaffId : ''),
+                function($attribute, $value, $fail) {
+                    if (!preg_match('/^[a-zA-Z]+\.[a-zA-Z]+@bouesti\.edu\.ng$/', $value)) {
+                        $fail('Please use your official university email address (e.g., firstname.lastname@bouesti.edu.ng)');
+                    }
+                }
+            ],
             'password' => $this->editingStaffId ? 'nullable|min:6' : 'required|min:6',
             'selectedRoles' => 'required|array|min:1',
             'selectedRoles.*' => 'exists:roles,id'

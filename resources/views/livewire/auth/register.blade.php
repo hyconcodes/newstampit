@@ -21,13 +21,36 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => [
+                'required', 
+                'string', 
+                'lowercase', 
+                'email', 
+                'max:255', 
+                'unique:' . User::class,
+                'regex:/^[a-zA-Z0-9.]+\.[0-9]+@bouesti\.edu\.ng$/',
+                function($attribute, $value, $fail) {
+                    if (!str_ends_with($value, '@bouesti.edu.ng')) {
+                        $fail('Please use your school email address (@bouesti.edu.ng).');
+                    }
+                    
+                    $matric = explode('@', $value)[0];
+                    $matric_number = explode('.', $matric)[1];
+                    
+                    $exists = User::where('email', 'LIKE', '%.' . $matric_number . '@bouesti.edu.ng')->exists();
+                    if ($exists) {
+                        $fail('A student with this matric number already exists.');
+                    }
+                }
+            ],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
         event(new Registered(($user = User::create($validated))));
+
+        $user->assignRole('student');
 
         Auth::login($user);
 
@@ -86,7 +109,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         />
 
         <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
+            <flux:button type="submit" variant="primary" class="w-full bg-green-600 hover:bg-green-700">
                 {{ __('Create account') }}
             </flux:button>
         </div>
@@ -94,6 +117,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
         {{ __('Already have an account?') }}
-        <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
+        <flux:link :href="route('login')" wire:navigate class="text-green-600 hover:text-green-700">{{ __('Log in') }}</flux:link>
     </div>
 </div>

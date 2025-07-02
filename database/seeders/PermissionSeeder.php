@@ -16,7 +16,13 @@ class PermissionSeeder extends Seeder
     {
         // Role::truncate();
         // Permission::truncate();
-        
+
+        // Update existing permissions
+        // Permission::where('name', 'view.invoices')->update(['name' => 'view.igr.invoices']);
+        // Permission::where('name', 'create.invoices')->update(['name' => 'create.igr.invoices']);
+        // Permission::where('name', 'edit.invoices')->update(['name' => 'edit.igr.invoices']);
+        // Permission::where('name', 'delete.invoices')->update(['name' => 'delete.igr.invoices']);
+
         $permissions = [
             // 'view.students',
             // 'create.students',
@@ -31,10 +37,24 @@ class PermissionSeeder extends Seeder
             // 'edit.permissions',
             // 'delete.permissions',
 
-            'view.staffs',
-            'create.staffs',
-            'edit.staffs',
-            'delete.staffs'
+            // 'view.staffs',
+            // 'create.staffs',
+            // 'edit.staffs',
+            // 'delete.staffs',
+
+            // 'view.invoices',
+            // 'upload.invoices',
+            // 'create.invoices',
+            // 'edit.invoices',
+            // 'delete.invoices',
+
+            // 'stamp.igr.invoices',
+            // 'stamp.school.fees.invoices',
+
+            'view.school.fees.invoices',
+            'create.school.fees.invoices',
+            'edit.school.fees.invoices',
+            'delete.school.fees.invoices',
         ];
 
         foreach ($permissions as $permission) {
