@@ -23,6 +23,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'matric_no',
+        'school_id',
+        'picture',
         'password',
     ];
 
@@ -57,7 +59,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
+            ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    //add school relatioship
+    public function school()
+    {
+        return $this->belongsTo(School::class);
     }
 }

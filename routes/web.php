@@ -25,6 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('staffs_management/staffs', 'staffs.staffs')
     ->name('staffs')
     ->middleware('permission:|view.staffs|create.staffs|edit.staffs|delete.staffs');
+
+    Volt::route('schools_management/schools', 'schools.schools')
+    ->name('schools')
+    ->middleware('permission:|view.schools|create.schools|edit.schools|delete.schools');
 });
 
 require __DIR__.'/auth.php';

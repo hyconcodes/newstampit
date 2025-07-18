@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\School;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +14,12 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public string $school_id = '';
+
+    public function schools()
+    {
+        return School::all();
+    }
 
     /**
      * Handle an incoming registration request.
@@ -21,6 +28,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
+            'school_id' => ['required', 'exists:schools,id'],
             'email' => [
                 'required', 
                 'string', 
@@ -34,8 +42,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
                         $fail('Please use your school email address (@bouesti.edu.ng).');
                     }
                     
-                    $matric = explode('@', $value)[0];
-                    $matric_number = explode('.', $matric)[1];
+                    $parts = explode('.', explode('@', $value)[0]);
+                    if (count($parts) < 2) {
+                        $fail('Invalid email format.');
+                        return;
+                    }
+                    
+                    $matric_number = $parts[1];
                     
                     $exists = User::where('email', 'LIKE', '%.' . $matric_number . '@bouesti.edu.ng')->exists();
                     if ($exists) {
@@ -47,6 +60,10 @@ new #[Layout('components.layouts.auth')] class extends Component {
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+        
+        // Extract matric number from email
+        $parts = explode('.', explode('@', $validated['email'])[0]);
+        $validated['matric_no'] = $parts[1];
 
         event(new Registered(($user = User::create($validated))));
 
@@ -59,6 +76,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
+    @include('includes.alert')
     <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
 
     <!-- Session Status -->
@@ -75,6 +93,18 @@ new #[Layout('components.layouts.auth')] class extends Component {
             autocomplete="name"
             :placeholder="__('Full name')"
         />
+
+        <!-- School -->
+        <flux:select
+            wire:model="school_id"
+            :label="__('School')"
+            required
+        >
+            <option value="">Select your school</option>
+            @foreach($this->schools() as $school)
+                <option value="{{ $school->id }}">{{ $school->name }}</option>
+            @endforeach
+        </flux:select>
 
         <!-- Email Address -->
         <flux:input

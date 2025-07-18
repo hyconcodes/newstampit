@@ -1,41 +1,61 @@
 <style>
 .alert {
-    position: relative;
+    position: fixed;
+    top: 20px;
+    right: 20px;
     padding: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     border: 1px solid transparent;
     border-radius: 0.25rem;
-    animation: fadeOut 5s forwards;
+    min-width: 300px;
+    max-width: 400px;
+    z-index: 9999;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-in, fadeOut 13s forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 @keyframes fadeOut {
     0% { opacity: 1; }
     80% { opacity: 1; }
-    100% { opacity: 0; display: none; }
+    100% { 
+        opacity: 0;
+        transform: translateX(100%);
+    }
 }
 
 .alert-success {
-    color: #0f5132;
-    background-color: #d1e7dd;
-    border-color: #badbcc;
+    color: #ffffff;
+    background-color: #00b74a;
+    /* border-color: #badbcc; */
 }
 
 .alert-danger {
-    color: #842029;
-    background-color: #f8d7da;
-    border-color: #f5c2c7;
+    color: #ffffff;
+    background-color: #fd0015;
+    /* border-color: #f5c2c7; */
 }
 
 .alert-warning {
-    color: #664d03;
-    background-color: #fff3cd;
-    border-color: #ffecb5;
+    color: #ffffff;
+    background-color: #fcc100;
+    /* border-color: #ffecb5; */
 }
 
 .alert-info {
-    color: #055160;
-    background-color: #cff4fc;
-    border-color: #b6effb;
+    color: #ffffff;
+    background-color: #00cffe;
+    /* border-color: #b6effb; */
 }
 
 .alert-dismissible {
@@ -51,6 +71,12 @@
     border: 0;
     font-size: 1.5rem;
     cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.btn-close:hover {
+    opacity: 1;
 }
 
 .btn-close::before {
@@ -61,9 +87,16 @@
     margin: 0;
     padding-left: 1.5rem;
 }
+
+.alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
 </style>
 
-<div>
+<div class="alert-container">
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}

@@ -1,1 +1,1 @@
-<img src="{{ asset('assets/stamp.jpg') }}" alt="Stampit Logo" class="h-10 rounded w-auto">
+<img src="{{ asset('assets/logo.png') }}" alt="Stampit Logo" class="h-10 rounded w-auto">

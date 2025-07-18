@@ -51,10 +51,15 @@ class PermissionSeeder extends Seeder
             // 'stamp.igr.invoices',
             // 'stamp.school.fees.invoices',
 
-            'view.school.fees.invoices',
-            'create.school.fees.invoices',
-            'edit.school.fees.invoices',
-            'delete.school.fees.invoices',
+            // 'view.school.fees.invoices',
+            // 'create.school.fees.invoices',
+            // 'edit.school.fees.invoices',
+            // 'delete.school.fees.invoices',
+
+            // 'view.schools',
+            // 'delete.schools',
+            // 'create.schools',
+            // 'edit.schools',
         ];
 
         foreach ($permissions as $permission) {

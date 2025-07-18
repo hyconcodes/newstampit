@@ -16,7 +16,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <div class="flex items-center">
-                        <img src="{{ asset('assets/stamp.jpg') }}" alt="Stampit Logo" class="h-10 rounded w-auto">
+                        <img src="{{ asset('assets/logo.png') }}" alt="Stampit Logo" class="h-10 rounded w-auto">
                     </div>
                     @if (Route::has('login'))
                         <div class="flex items-center space-x-4">

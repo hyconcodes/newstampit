@@ -5,10 +5,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 
 new class extends Component {
+    use WithFileUploads;
+
     public string $name = '';
     public string $email = '';
+    public string $school = '';
+    public string $matric_no = '';
+    public $photo;
+    public $temp_photo;
 
     /**
      * Mount the component.
@@ -17,6 +24,8 @@ new class extends Component {
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->school = Auth::user()->school->name;
+        $this->matric_no = Auth::user()->matric_no;
     }
 
     /**
@@ -28,26 +37,41 @@ new class extends Component {
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-
-            'email' => [
+            'photo' => ['nullable', 'image', 'max:1024'], // 1MB Max
+            /*'email' => [
                 'required',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id)
-            ],
+            ],*/
         ]);
+
+        if ($this->photo) {
+            $validated['picture'] = $this->photo->storeAs('picture', time() . '.' . $this->photo->getClientOriginalExtension(), 'public');
+        }
 
         $user->fill($validated);
 
-        if ($user->isDirty('email')) {
+        /*if ($user->isDirty('email')) {
             $user->email_verified_at = null;
-        }
+        }*/
 
         $user->save();
 
-        $this->dispatch('profile-updated', name: $user->name);
+        $this->reset('photo', 'temp_photo');
+        session()->flash('success', 'Saved');
+        $this->dispatch('profile-updated', name: $user->name, photo: $user->picture);
+    }
+
+    public function updatedPhoto()
+    {
+        $this->validate([
+            'photo' => ['image', 'max:1024']
+        ]);
+        
+        $this->temp_photo = $this->photo->temporaryUrl();
     }
 
     /**
@@ -72,31 +96,53 @@ new class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your profile information')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
+            <div class="col-span-6 sm:col-span-4">
+                @if($temp_photo)
+                    <img src="{{ $temp_photo }}" class="rounded-full h-20 w-20 object-cover">
+                @elseif(auth()->user()->picture)
+                    <img src="{{ asset('storage/' . auth()->user()->picture) }}" class="rounded-full h-20 w-20 object-cover">
+                    {{-- <img src="{{ Storage::url(auth()->user()->picture) }}" class="rounded-full h-20 w-20 object-cover"> --}}
+                @endif
+                <flux:input type="file" wire:model="photo" :label="__('Profile Photo')" accept="image/*" />
+                @error('photo') <span class="text-red-500">{{ $message }}</span> @enderror
+            </div>
+
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
-
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
-                    <div>
-                        <flux:text class="mt-4">
-                            {{ __('Your email address is unverified.') }}
-
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
-                                {{ __('Click here to re-send the verification email.') }}
-                            </flux:link>
-                        </flux:text>
-
-                        @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </flux:text>
-                        @endif
-                    </div>
-                @endif
+                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" disabled />
+                {{-- <flux:text class="mt-1 text-sm text-gray-500">Email cannot be updated</flux:text> --}}
             </div>
+
+            <div>
+                <flux:input wire:model="school" :label="__('School')" type="text" disabled />
+                {{-- <flux:text class="mt-1 text-sm text-gray-500">School cannot be updated</flux:text> --}}
+            </div>
+
+            <div>
+                <flux:input wire:model="matric_no" :label="__('Matric Number')" type="text" disabled />
+                {{-- <flux:text class="mt-1 text-sm text-gray-500">Matric number cannot be updated</flux:text> --}}
+            </div>
+
+            @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
+                <div>
+                    <flux:text class="mt-4">
+                        {{ __('Your email address is unverified.') }}
+
+                        <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
+                            {{ __('Click here to re-send the verification email.') }}
+                        </flux:link>
+                    </flux:text>
+
+                    @if (session('status') === 'verification-link-sent')
+                        <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
+                            {{ __('A new verification link has been sent to your email address.') }}
+                        </flux:text>
+                    @endif
+                </div>
+            @endif
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
