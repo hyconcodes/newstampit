@@ -87,7 +87,7 @@ new class extends Component {
                 class="w-full sm:w-auto rounded border-zinc-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm"/>
         </div>
     </div>
-@include('includes.alert')
+{{-- @include('includes.alert') --}}
     <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 sm:p-6 mb-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-medium dark:text-white">{{ $editingSchoolId ? 'Edit School' : 'Add New School' }}</h3>
@@ -125,7 +125,7 @@ new class extends Component {
                         </thead>
                         <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
                             @foreach($schools as $school)
-                                <tr>
+                                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700 cursor-pointer" onclick="window.location.href='{{ route('schools.show', $school->id) }}'">
                                     <td class="px-3 sm:px-6 py-4">
                                         <div class="text-sm dark:text-white">{{ $school->name }}</div>
                                     </td>

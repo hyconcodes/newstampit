@@ -37,6 +37,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('schools_management/schools', 'schools.schools')
     ->name('schools')
     ->middleware('permission:|view.schools|create.schools|edit.schools|delete.schools');
+
+    Volt::route('view/{id}/schools', 'schools.view_schools')
+    ->name('schools.show')
+    ->middleware('permission:|view.schools|create.schools|edit.schools|delete.schools');
 });
 
 require __DIR__.'/auth.php';
