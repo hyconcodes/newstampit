@@ -4,18 +4,15 @@
             <div
                 class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
                 <div class="absolute inset-0 flex flex-col justify-center items-center p-4 bg-white dark:bg-neutral-900">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ Auth::user()->name }}</div>
-                    <div class="text-sm text-gray-500 dark:text-neutral-400">
-                        <span class="font-medium">{{ Auth::user()->email }}</span>
-                    </div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white">System Administrators</div>
                     <div class="mt-2 flex gap-4 text-sm">
                         <div class="text-center">
-                            <div class="font-semibold text-gray-900 dark:text-white">0</div>
-                            <div class="text-gray-500 dark:text-neutral-400">Documents</div>
+                            <div class="font-semibold text-gray-900 dark:text-white">{{ \Spatie\Permission\Models\Role::findByName('school fees admin')->users()->count() }}</div>
+                            <div class="text-gray-500 dark:text-neutral-400">School Fees Admins</div>
                         </div>
                         <div class="text-center">
-                            <div class="font-semibold text-gray-900 dark:text-white">0</div>
-                            <div class="text-gray-500 dark:text-neutral-400">Stamps</div>
+                            <div class="font-semibold text-gray-900 dark:text-white">{{ \Spatie\Permission\Models\Role::findByName('igrs admin')->users()->count() }}</div>
+                            <div class="text-gray-500 dark:text-neutral-400">IGRS Admins</div>
                         </div>
                     </div>
                 </div>

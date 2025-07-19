@@ -26,6 +26,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ->name('staffs')
     ->middleware('permission:|view.staffs|create.staffs|edit.staffs|delete.staffs');
 
+    Volt::route('students_management/students', 'students.students')
+    ->name('students')
+    ->middleware('permission:|view.students|create.students|edit.students|delete.students');
+
+    Volt::route('view/students/{id}/students', 'students.view_students')
+    ->name('student.show')
+    ->middleware('permission:|view.students');
+
     Volt::route('schools_management/schools', 'schools.schools')
     ->name('schools')
     ->middleware('permission:|view.schools|create.schools|edit.schools|delete.schools');

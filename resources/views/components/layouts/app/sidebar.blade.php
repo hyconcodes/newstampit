@@ -25,6 +25,11 @@
                     </flux:navlist.item>
                     @endcanany
 
+                    @canany(['view.students', 'create.students', 'edit.students', 'delete.students'])
+                    <flux:navlist.item icon="user" :href="route('students')" :current="request()->routeIs('students')" wire:navigate>{{ __('Students Management') }}
+                    </flux:navlist.item>
+                    @endcanany
+
                     @canany(['view.schools', 'create.schools', 'edit.schools', 'delete.schools'])
                     <flux:navlist.item icon="academic-cap" :href="route('schools')" :current="request()->routeIs('schools')" wire:navigate>{{ __('Schools') }}
                     </flux:navlist.item>

@@ -24,8 +24,8 @@ new class extends Component {
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
-        $this->school = Auth::user()->school->name;
-        $this->matric_no = Auth::user()->matric_no;
+        $this->school = Auth::user()->school->name ?? 'waiting...';
+        $this->matric_no = Auth::user()->matric_no ?? 'waiting...';
     }
 
     /**
