@@ -14,3 +14,6 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
 @include('includes.alert')
+@role('student')
+    <x-bottombar />
+@endrole

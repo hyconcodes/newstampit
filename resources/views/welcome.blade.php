@@ -80,11 +80,11 @@
 
                     <div class="mt-16 flex flex-col sm:flex-row items-center justify-center gap-4">
                         @auth
-                            <a href="{{ url('/dashboard') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            <a href="{{ url('/dashboard') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
                                 Access Dashboard
                             </a>
                         @else
-                            <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
                                 Get Started Now
                             </a>
                             <a href="{{ route('login') }}" class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transform transition border border-gray-200 dark:border-gray-700">

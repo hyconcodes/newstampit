@@ -12,7 +12,7 @@ new class extends Component {
 
         if (!$this->student) {
             session()->flash('error', 'Student not found');
-            redirect()->back()->send();
+            abort(404);
         }
     }
 
@@ -58,7 +58,7 @@ new class extends Component {
     <div class="space-y-3">
         <div class="flex justify-between text-sm">
             <span class="text-muted-foreground dark:text-zinc-400">School:</span>
-            <span class="font-medium text-foreground dark:text-white">{{ $student->school->name }}</span>
+            <span class="font-medium text-foreground dark:text-white">{{ $student->school->name ?? "pending..." }}</span>
         </div>
         <div class="flex justify-between text-sm">
             <span class="text-muted-foreground dark:text-zinc-400">Joined:</span>
