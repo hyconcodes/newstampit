@@ -40,7 +40,21 @@ new #[Layout('components.layouts.auth')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        // Get authenticated user and their role
+        $user = Auth::user();
+        $roles = $user->getRoleNames();
+        $firstRole = $roles->first();
+
+        // Redirect based on user role
+        $redirectRoute = match($firstRole) {
+            'student' => route('student.dashboard', absolute: false),
+            'super admin' => route('dashboard', absolute: false),
+            'school fees admin', 'igrs admin' => route('admins.dashboard', absolute: false),
+            // default => route('dashboard', absolute: false),
+            default => route('404', absolute: false),
+        };
+
+        $this->redirectIntended(default: $redirectRoute, navigate: true);
     }
 
     /**
@@ -114,7 +128,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <flux:checkbox wire:model="remember" :label="__('Remember me')" />
 
         <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full bg-green-600 hover:bg-green-700">{{ __('Log in') }}</flux:button>
+            <flux:button variant="primary" type="submit" class="w-full bg-green-600 hover:bg-green-700 cursor-pointer">{{ __('Log in') }}</flux:button>
         </div>
     </form>
 

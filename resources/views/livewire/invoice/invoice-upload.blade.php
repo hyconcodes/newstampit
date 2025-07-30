@@ -2,6 +2,7 @@
 
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
+use App\Models\Invoice;
 
 new class extends Component {
     use WithFileUploads;
@@ -16,22 +17,29 @@ new class extends Component {
         try {
             $this->validate(
                 [
-                    'rrr' => 'required|string|size:12',
+                    'rrr' => 'required|string|size:12|unique:invoices,rrr',
                     'fee_type' => 'required|in:school_fees,igr',
                     'amount' => 'required|numeric',
                     'invoice_file' => 'required|mimes:pdf|max:2048',
                 ],
                 [
                     'rrr.size' => 'The RRR number must be exactly 12 digits.',
+                    'rrr.unique' => 'Used RRR number.',
+                    'invoice_file.mimes' => 'The invoice file must be a PDF file.',
+                    'invoice_file.max' => 'The invoice file must be less than 2MB.',
                 ],
             );
-            dd([
+
+            $invoice_path = $this->invoice_file->store('invoices', 'public');
+
+            Invoice::create([
+                'user_id' => auth()->id(),
                 'rrr' => $this->rrr,
                 'fee_type' => $this->fee_type,
                 'amount' => $this->amount,
-                'invoice_file' => $this->invoice_file->store('invoices', 'public'),
+                'invoice_file' => $invoice_path,
             ]);
-
+            $this->reset(['rrr', 'fee_type', 'amount', 'invoice_file']);
             session()->flash('success', 'Invoice uploaded successfully!');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to upload invoice: ' . $e->getMessage());
@@ -39,7 +47,13 @@ new class extends Component {
     }
 }; ?>
 
-<div class="p-4">
+<div class="p-4 relative">
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-neutral-950 dark:to-neutral-900">
+            <!-- Floating Background Elements -->
+           <x-floating-icons/>
+        </div>
+    </div>
     @include('includes.alert')
 
     <form wire:submit="save" class="space-y-4">

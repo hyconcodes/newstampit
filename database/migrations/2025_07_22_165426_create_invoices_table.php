@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
+            $table->string('rrr')->unique();
+            $table->enum('fee_type', ['school_fees', 'igr'])->nullable()->default('school_fees');
+            $table->decimal('amount', 10, 2);
+            $table->string('invoice_file')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -147,7 +147,7 @@
 
 
 @if (session()->has('success'))
-    <div class="bg-green-700 text-white-700 px-4 py-3 rounded relative mb-4" role="alert">
+    <div class="bg-green-600 text-white-700 px-4 py-3 rounded relative mb-4" role="alert">
         <span class="block sm:inline">{{ session('success') }}</span>
         <button type="button" class="absolute top-0 right-0 px-4 py-3" onclick="this.parentElement.remove()">
             <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -159,7 +159,7 @@
 @endif
 
 @if (session()->has('error'))
-    <div class="bg-red-700 text-white-700 px-4 py-3 rounded relative mb-4" role="alert">
+    <div class="bg-red-600 text-white-700 px-4 py-3 rounded relative mb-4" role="alert">
         <span class="block sm:inline">{{ session('error') }}</span>
         <button type="button" class="absolute top-0 right-0 px-4 py-3" onclick="this.parentElement.remove()">
             <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
