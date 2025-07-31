@@ -42,13 +42,13 @@
 
         <!-- Dashboard Cards -->
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <a href="{{ route('student.pending.invoices') }}" class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 transition-all hover:shadow-lg hover:shadow-green-500/20 hover:border-green-500/50 cursor-pointer">
+            <a href="{{ route('student.pending.invoices') }}" class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 transition-all hover:shadow-lg hover:shadow-yellow-500/20 hover:border-yellow-500/50 cursor-pointer">
                 <div class="absolute inset-0 flex flex-col justify-center items-center p-4">
-                    <svg class="w-12 h-12 text-blue-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    <svg class="w-12 h-12 text-yellow-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <div class="text-xl font-bold text-gray-900 dark:text-white">My Invoices</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">Manage your invoice documents</p>
+                    <div class="text-xl font-bold text-gray-900 dark:text-white">Pending Invoices</div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">View your pending invoice documents</p>
                 </div>
             </a>
 
@@ -62,15 +62,15 @@
                 </div>
             </a>
 
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 transition-all hover:shadow-lg hover:shadow-green-500/20 hover:border-green-500/50">
+            <a href="{{ route('invoice.upload') }}" class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 transition-all hover:shadow-lg hover:shadow-green-500/20 hover:border-yellow-500/50">
                 <div class="absolute inset-0 flex flex-col justify-center items-center p-4">
                     <svg class="w-12 h-12 text-yellow-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
                     <div class="text-xl font-bold text-gray-900 dark:text-white">Upload New Invoice</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">Quickly upload a new document</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">Quickly upload a new invoice</p>
                 </div>
-            </div>
+            </a>
         </div>
 
         <!-- Activity Section -->
