@@ -6,7 +6,8 @@ use App\Models\Invoice;
 new class extends Component {
     public $invoices;
     public $search = '';
-    public $status = 'pending';
+    public $showCancelModal = false;
+    public $selectedInvoiceId;
 
     public function mount()
     {
@@ -21,16 +22,23 @@ new class extends Component {
             ->when($this->search, function ($query) {
                 $query->where('rrr', 'like', '%' . $this->search . '%');
             })
-            ->where('status', $this->status)
+            ->where('status', 'pending')
             ->latest()
             ->get();
     }
 
-    public function updateStatus($invoiceId, $newStatus)
+    public function confirmCancel($invoiceId)
     {
-        $invoice = Invoice::find($invoiceId);
+        $this->selectedInvoiceId = $invoiceId;
+        $this->showCancelModal = true;
+    }
+
+    public function cancelInvoice()
+    {
+        $invoice = Invoice::find($this->selectedInvoiceId);
         if ($invoice && $invoice->user_id === auth()->id()) {
-            $invoice->update(['status' => $newStatus]);
+            $invoice->update(['status' => 'cancelled']);
+            $this->showCancelModal = false;
             $this->loadInvoices();
         }
     }
@@ -45,16 +53,10 @@ new class extends Component {
         </div>
     </div>
     <div class="max-w-7xl mx-auto mb-8">
-        <h2 class="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">Your Invoices</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">Pending Invoices</h2>
         <div class="flex flex-col sm:flex-row gap-4 mb-8">
             <input wire:model.live="search" type="text" placeholder="Search by invoice number..."
                 class="w-full sm:w-auto px-4 py-2 border rounded-lg bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
-            <select wire:model.live="status"
-                class="w-full sm:w-auto px-4 py-2 border rounded-lg bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
-                <option value="pending">Pending</option>
-                <option value="rejected">Rejected</option>
-                <option value="stamped">Stamped</option>
-            </select>
         </div>
     </div>
 
@@ -63,60 +65,17 @@ new class extends Component {
             <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg overflow-hidden transform transition-all hover:scale-[1.02]">
                 <div class="p-4 sm:p-6">
                     <!-- PDF Preview or Placeholder -->
-                    <div class="">
-                        @if ($invoice->invoice_file && Storage::exists($invoice->invoice_file))
-                            <div id="pdf-viewer-{{ $invoice->id }}" class="mb-6 h-48 sm:h-56 flex items-center justify-center bg-zinc-100 dark:bg-zinc-700 rounded-lg overflow-hidden"></div>
-                            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
-                            <script>
-                                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
-                                
-                                async function loadPDF{{ $invoice->id }}() {
-                                    const url = "{{ asset('storage/' . $invoice->invoice_file) }}";
-                                    const loadingTask = pdfjsLib.getDocument(url);
-                                    
-                                    try {
-                                        const pdf = await loadingTask.promise;
-                                        const page = await pdf.getPage(1);
-                                        
-                                        const scale = 1.5;
-                                        const viewport = page.getViewport({ scale });
-                                        
-                                        const canvas = document.createElement('canvas');
-                                        const context = canvas.getContext('2d');
-                                        canvas.height = viewport.height;
-                                        canvas.width = viewport.width;
-                                        canvas.classList.add('rounded-lg');
-                                        
-                                        const renderContext = {
-                                            canvasContext: context,
-                                            viewport: viewport
-                                        };
-                                        
-                                        document.getElementById('pdf-viewer-{{ $invoice->id }}').appendChild(canvas);
-                                        await page.render(renderContext);
-                                    } catch (error) {
-                                        console.error('Error loading PDF:', error);
-                                    }
-                                }
-                                
-                                loadPDF{{ $invoice->id }}();
-                            </script>
-                        @else
-                            <div class="text-6xl text-green-500 dark:text-green-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                        @endif
-                    </div>
+                    <x-pdf-viewer :invoice-id="$invoice->id" :invoice-file="$invoice->invoice_file" />
 
                     <!-- Invoice Details -->
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Invoice rrr #</span>
                             <span class="text-sm text-zinc-900 dark:text-zinc-100">{{ $invoice->rrr }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Invoice type</span>
+                            <span class="text-sm text-zinc-900 dark:text-zinc-100">{{ $invoice->fee_type === 'school_fees' ? 'School Fees Invoice'  : 'IGR' }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Amount</span>
@@ -130,41 +89,45 @@ new class extends Component {
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Status</span>
-                            <span
-                                class="px-3 py-1 text-xs font-semibold rounded-full 
-                                {{ $invoice->status === 'stamped'
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                    : ($invoice->status === 'rejected'
-                                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200') }}">
-                                {{ ucfirst($invoice->status) }}
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                Pending
                             </span>
                         </div>
                     </div>
 
                     <!-- Actions -->
                     <div class="mt-6 flex flex-wrap gap-2 justify-end">
-                        {{-- @if ($invoice->status === 'pending')
-                            <button wire:click="updateStatus({{ $invoice->id }}, 'stamped')"
-                                class="px-4 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors">
-                                Mark as Stamped
-                            </button>
-                            <button wire:click="updateStatus({{ $invoice->id }}, 'rejected')"
-                                class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition-colors">
-                                Reject
-                            </button>
-                        @endif --}}
-                        <a href="{{ route('invoice.download', $invoice) }}"
-                            class="w-full px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
-                            Download
-                        </a>
+                        <button wire:click="confirmCancel({{ $invoice->id }})"
+                            class="w-full px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition-colors">
+                            Cancel
+                        </button>
                     </div>
                 </div>
             </div>
         @empty
             <div class="col-span-full text-center py-12 text-zinc-500 dark:text-zinc-400">
-                No invoices found
+                No pending invoices found
             </div>
         @endforelse
     </div>
+
+    <!-- Cancel Confirmation Modal -->
+    @if($showCancelModal)
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4">Confirm Cancellation</h3>
+            <p class="text-zinc-600 dark:text-zinc-300 mb-6">Are you sure you want to cancel this invoice? This action cannot be undone.</p>
+            <div class="flex justify-end gap-4">
+                <button wire:click="$set('showCancelModal', false)"
+                    class="px-4 py-2 text-sm text-zinc-600 hover:text-zinc-800 dark:text-zinc-300 dark:hover:text-zinc-100">
+                    No, Keep It
+                </button>
+                <button wire:click="cancelInvoice"
+                    class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600">
+                    Yes, Cancel Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

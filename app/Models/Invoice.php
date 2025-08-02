@@ -12,6 +12,8 @@ class Invoice extends Model
         'amount',
         'invoice_file',
         'user_id',
+        'status',
+        'comment',
     ];
 
     // protected $casts = [
