@@ -21,7 +21,15 @@
                     @if (Route::has('login'))
                         <div class="flex items-center space-x-4">
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition">Dashboard</a>
+                                @role('super admin')
+                                    <a href="{{ route('dashboard') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition">Dashboard</a>
+                                @endrole
+                                @role('student')
+                                    <a href="{{ route('student.dashboard') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition">Dashboard</a>
+                                @endrole
+                                @hasanyrole('school fees admin|igrs admin')
+                                    <a href="{{ route('admins.dashboard') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition">Dashboard</a>
+                                @endhasanyrole
                             @else
                                 <a href="{{ route('login') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition">Log in</a>
                                 @if (Route::has('register'))
@@ -80,9 +88,21 @@
 
                     <div class="mt-16 flex flex-col sm:flex-row items-center justify-center gap-4">
                         @auth
-                            <a href="{{ url('/dashboard') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-                                Access Dashboard
-                            </a>
+                            @role('super admin')
+                                <a href="{{ route('dashboard') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                                    Access Dashboard
+                                </a>
+                            @endrole
+                            @role('student')
+                                <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                                    Access Dashboard
+                                </a>
+                            @endrole
+                            @hasanyrole('school fees admin|igrs admin')
+                                <a href="{{ route('admins.dashboard') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                                    Access Dashboard
+                                </a>
+                            @endhasanyrole
                         @else
                             <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 bg-green-600 text-white text-center font-semibold rounded-xl hover:bg-green-700 transform transition focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
                                 Get Started Now
