@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         
-        // User::where('email', 'roth.2730@bouesti.edu.ng')->update([
+        // User::where('email', 'wave.wave@bouesti.edu.ng')->update([
         //     'email_verified_at' => now()
         // ]);
     }
