@@ -58,10 +58,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('student.pending.invoices')
         ->middleware('permission:|upload.invoices');
 
+    Volt::route('invoice/update-pending/{id}/invoices', 'students.update-pending-invoices')
+        ->name('student.update-pending.invoices')
+        ->middleware('permission:|upload.invoices');
+
+    // for student to view stamped invoices
     Volt::route('invoice/stamped/documents', 'invoice.stamped-documents')
         ->name('student.stamped-documents')
         ->middleware('permission:|upload.invoices');
-    Route::get('invoice/download')->name('invoice.download');
+
+    //route for officers to stamp school fees inv
+    Volt::route('admin/school-fees/invoices', 'admins.schoolfees-documents')
+        ->name('stamp.schoolfees.invoices')
+        ->middleware('permission:|stamp.school.fees.invoices');
+
+    //route for officers to stamp igrs inv
+    Volt::route('admin/igrs/invoices', 'admins.igrs-documents')
+        ->name('stamp.igrs.invoices')
+        ->middleware('permission:|stamp.igr.invoices');
+
+    // dummy/testing route
+    // Route::get('invoice/download')->name('invoices.edit');
 });
 
 require __DIR__ . '/auth.php';

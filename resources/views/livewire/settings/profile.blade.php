@@ -98,14 +98,14 @@ new class extends Component {
 
     <x-settings.layout :heading="__('Profile')" :subheading="__('Update your profile information')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <div class="col-span-6 sm:col-span-4">
+            <div class="col-span-6 sm:col-span-4 flex flex-col items-center">
                 @if($temp_photo)
-                    <img src="{{ $temp_photo }}" class="rounded-full h-20 w-20 object-cover">
+                    <img src="{{ $temp_photo }}" class="rounded-full h-20 w-20 object-cover mb-4">
                 @elseif(auth()->user()->picture)
-                    <img src="{{ asset('storage/' . auth()->user()->picture) }}" class="rounded-full h-20 w-20 object-cover">
+                    <img src="{{ asset('storage/' . auth()->user()->picture) }}" class="rounded-full h-20 w-20 object-cover mb-4">
                     {{-- <img src="{{ Storage::url(auth()->user()->picture) }}" class="rounded-full h-20 w-20 object-cover"> --}}
                 @endif
-                <flux:input type="file" wire:model="photo" :label="__('Profile Photo')" accept="image/*" />
+                <flux:input type="file" wire:model="photo" :label="__('Profile Photo')" accept="image/*" class="w-full" />
                 @error('photo') <span class="text-red-500">{{ $message }}</span> @enderror
             </div>
 

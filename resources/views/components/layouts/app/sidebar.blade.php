@@ -43,6 +43,20 @@
                 @endcanany
             </flux:navlist.group>
         </flux:navlist>
+        <flux:navlist variant="outline">
+            <flux:navlist.group :heading="__('Student Invoices')" class="grid" expandable>
+                @can(['stamp.school.fees.invoices'])
+                    <flux:navlist.item icon="document-check" :href="route('stamp.schoolfees.invoices')"
+                        :current="request()->routeIs('stamp.schoolfees.invoices')" wire:navigate>{{ __('School fees invoices') }}
+                    </flux:navlist.item>
+                @endcan
+                @can(['stamp.igr.invoices'])
+                    <flux:navlist.item icon="document-check" :href="route('stamp.igrs.invoices')"
+                        :current="request()->routeIs('stamp.igrs.invoices')" wire:navigate>{{ __('IGRs invoices') }}
+                    </flux:navlist.item>
+                @endcan
+            </flux:navlist.group>
+        </flux:navlist>
 
         <flux:spacer />
 
