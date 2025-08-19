@@ -15,7 +15,9 @@
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.1.1",
         "livewire/volt": "^1.7.0",
-        "spatie/laravel-permission": "^6.20"
+        "smalot/pdfparser": "^2.12",
+        "spatie/laravel-permission": "^6.20",
+        "spatie/pdf-to-image": "^1.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

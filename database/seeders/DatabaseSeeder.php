@@ -21,8 +21,17 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         
-        // User::where('email', 'wave.wave@bouesti.edu.ng')->update([
+        User::where('email', 'bolaji.2782@bouesti.edu.ng')->update([
+            'email_verified_at' => now()
+        ]);
+
+        // $user = User::create([
+        //     'name' => 'Stampit Super Admin',
+        //     'email' => 'superadmin@admin.com',
+        //     'password' => bcrypt('password'),
         //     'email_verified_at' => now()
         // ]);
+
+        // $user->assignRole('super admin');
     }
 }
