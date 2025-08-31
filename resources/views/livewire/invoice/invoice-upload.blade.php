@@ -3,7 +3,6 @@
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
 use App\Models\Invoice;
-use Smalot\PdfParser\Parser;
 
 new class extends Component {
     use WithFileUploads;
@@ -11,21 +10,40 @@ new class extends Component {
     public $rrr;
     public $fee_type;
     public $invoice_file;
+    public $extracted_numbers = [
+        'remita' => null,
+        'invoice' => null,
+    ];
 
-    public function extractHyphenNumber($filePath)
+    public function extractNumbers($filePath)
     {
-        $parser = new Parser();
-        $pdf = $parser->parseFile($filePath);
+        try {
+            // Read PDF file as raw text
+            $content = file_get_contents($filePath);
 
-        $text = $pdf->getText();
+            $remita = null;
+            $invoice = null;
 
-        // Match pattern like 2212-4849-4473
-        if (preg_match('/\d{4}-\d{4}-\d{4}/', $text, $matches)) {
-            // Remove hyphens from the matched number
-            return str_replace('-', '', $matches[0]); // e.g. "221248494473"
+            // Match REMITA reference (e.g. REMITA-250819423315)
+            if (preg_match('/REMITA-(\d+)/', $content, $matches)) {
+                $remita = 'REMITA-' . $matches[1];
+            }
+
+            // Match 12-digit hyphenated number (xxxx-xxxx-xxxx)
+            if (preg_match('/(\d{4}-\d{4}-\d{4})/', $content, $matches)) {
+                $invoice = $matches[1];
+            }
+
+            return [
+                'remita' => $remita,
+                'invoice' => $invoice,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'remita' => null,
+                'invoice' => null,
+            ];
         }
-
-        return null; // if not found
     }
 
     public function save()
@@ -35,39 +53,43 @@ new class extends Component {
             $validationRules = [
                 'fee_type' => 'required|in:school_fees,igr',
                 'invoice_file' => 'required|mimes:pdf|max:2048',
+                'rrr' => 'required|string|size:12|unique:invoices,rrr',
             ];
 
             $validationMessages = [
                 'invoice_file.mimes' => 'The invoice file must be a PDF file.',
                 'invoice_file.max' => 'The invoice file must be less than 2MB.',
+                'rrr.size' => 'The RRR number must be exactly 12 digits.',
+                'rrr.unique' => 'Used RRR number.',
+                'rrr.required' => 'The RRR number is required.',
             ];
-
-            // Add RRR validation only for IGR
-            if ($this->fee_type === 'igr') {
-                $validationRules['rrr'] = 'required|string|size:12|unique:invoices,rrr';
-                $validationMessages['rrr.size'] = 'The RRR number must be exactly 12 digits.';
-                $validationMessages['rrr.unique'] = 'Used RRR number.';
-            }
 
             $this->validate($validationRules, $validationMessages);
 
             $invoice_path = $this->invoice_file->store('invoices', 'public');
+            $extractedData = $this->extractNumbers(storage_path('app/public/' . $invoice_path));
 
             if ($this->fee_type === 'igr') {
-                $extractedNumber = $this->extractHyphenNumber(storage_path('app/public/' . $invoice_path));
 
-                if (!$extractedNumber) {
-                    throw new \Exception('Could not extract RRR number from PDF.');
-                }
+                // Remove hyphens from extracted number for comparison
+                $extractedRrr = str_replace('-', '', $extractedData['invoice']);
 
-                if ($extractedNumber !== $this->rrr) {
-                    throw new \Exception('The RRR number entered does not match the one in the PDF document.');
-                }
+                // if ($extractedRrr !== $this->rrr) {
+                //     throw new \Exception('The RRR number entered does not match the one in the PDF document.');
+                // }
+            } elseif ($this->fee_type === 'school_fees') {
+
+                // Extract digits from REMITA reference (e.g., REMITA-250819423315 -> 250819423315)
+                $extractedRrr = preg_replace('/[^0-9]/', '', $extractedData['remita']);
+
+                // if ($extractedRrr !== $this->rrr) {
+                //     throw new \Exception('The RRR number entered does not match the REMITA reference in the PDF document.');
+                // }
             }
 
             Invoice::create([
                 'user_id' => auth()->id(),
-                'rrr' => $this->fee_type === 'igr' ? $this->rrr : null,
+                'rrr' => $this->rrr,
                 'fee_type' => $this->fee_type,
                 'invoice_file' => $invoice_path,
             ]);
@@ -104,17 +126,16 @@ new class extends Component {
             @enderror
         </div>
 
-        {{-- RRR input (hidden by default) --}}
-        <div id="rrr-wrapper" style="display:none;">
+        {{-- RRR input (now always visible) --}}
+        <div>
             <label for="rrr" class="block text-sm font-medium text-zinc-700 dark:text-zinc-200">RRR Number</label>
             <flux:input type="text" wire:model="rrr" id="rrr"
-                class="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-600 shadow-sm dark:bg-zinc-700 dark:text-zinc-200" />
+                class="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-600 shadow-sm dark:bg-zinc-700 dark:text-zinc-200"
+                placeholder="12-digit RRR number" disabled />
             @error('rrr')
                 <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
             @enderror
         </div>
-
-
 
         <div>
             <label for="invoice_file" class="block text-sm font-medium text-zinc-700 dark:text-zinc-200">Invoice
@@ -217,7 +238,12 @@ new class extends Component {
     </form>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
 <script>
+    // Set PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
     document.addEventListener('DOMContentLoaded', function() {
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('invoice_file');
@@ -289,6 +315,7 @@ new class extends Component {
             if (files.length > 0) {
                 const file = files[0];
                 updateDropText(file.name);
+                extractPdfNumbers(file);
             }
         }
 
@@ -316,9 +343,62 @@ new class extends Component {
                 bubbles: true
             }));
 
-            // Update UI
+            // Update UI and extract numbers
             updateDropText(file.name);
+            extractPdfNumbers(file);
         }
+
+        async function extractPdfNumbers(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+
+                let fullText = '';
+
+                // Extract text from all pages
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + ' ';
+                }
+
+                // Extract numbers based on patterns
+                let remita = null;
+                let invoice = null;
+
+                // Match REMITA reference (e.g. REMITA-250819423315)
+                const remitaMatch = fullText.match(/REMITA-\d+/);
+                if (remitaMatch) {
+                    remita = remitaMatch[0];
+                }
+
+                // Match 12-digit hyphenated number (xxxx-xxxx-xxxx)
+                const invoiceMatch = fullText.match(/\d{4}-\d{4}-\d{4}/);
+                if (invoiceMatch) {
+                    invoice = invoiceMatch[0];
+                }
+
+                // Decide what to fill into Livewire's `rrr`
+                if (remita) {
+                    // strip REMITA- and set RRR
+                    @this.set('rrr', remita.replace('REMITA-', ''));
+                } else if (invoice) {
+                    // remove hyphens and set RRR
+                    @this.set('rrr', invoice.replace(/-/g, ''));
+                }
+
+                console.log('Extracted:', {
+                    remita,
+                    invoice
+                });
+
+            } catch (error) {
+                console.error('Error extracting PDF numbers:', error);
+                showError('Failed to extract numbers from PDF. Please try again.');
+            }
+        }
+
 
         function showDragOverlay() {
             if (dragOverlay) {
@@ -378,26 +458,4 @@ new class extends Component {
             }
         });
     });
-
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     const feeTypeSelect = document.getElementById('fee_type');
-    //     const rrrWrapper = document.getElementById('rrr-wrapper');
-
-    //     function toggleRRR() {
-    //         if (feeTypeSelect.value === 'igr') {
-    //             rrrWrapper.style.display = 'block';
-    //         } else {
-    //             rrrWrapper.style.display = 'none';
-    //         }
-    //     }
-
-    //     // Run once on load (in case Livewire restores state)
-    //     toggleRRR();
-
-    //     // Listen for changes
-    //     feeTypeSelect.addEventListener('change', toggleRRR);
-
-    //     // Also listen for Livewire updates
-    //     document.addEventListener("livewire:update", toggleRRR);
-    // });
 </script>
