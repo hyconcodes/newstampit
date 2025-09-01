@@ -105,11 +105,11 @@ new class extends Component {
                                 <span
                                     class="text-sm text-zinc-900 dark:text-zinc-100">{{ $invoice->fee_type === 'school_fees' ? 'School Fees Invoice' : 'IGR' }}</span>
                             </div>
-                            <div class="flex justify-between items-center">
+                            {{-- <div class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Amount</span>
                                 <span
                                     class="text-sm text-zinc-900 dark:text-zinc-100">₦{{ number_format($invoice->amount, 2) }}</span>
-                            </div>
+                            </div> --}}
                             <div class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Date</span>
                                 <span

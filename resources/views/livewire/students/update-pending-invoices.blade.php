@@ -25,14 +25,14 @@ new class extends Component {
         $this->validate([
             'rrr' => 'required|string',
             'fee_type' => 'required|in:school_fees,igr',
-            'amount' => 'required|numeric|min:0',
+            // 'amount' => 'required|numeric|min:0',
             'invoice_file' => 'nullable|file|mimes:pdf'
         ]);
 
         $updateData = [
             'rrr' => $this->rrr,
             'fee_type' => $this->fee_type,
-            'amount' => $this->amount,
+            // 'amount' => $this->amount,
         ];
 
         if ($this->invoice_file) {
@@ -87,14 +87,14 @@ new class extends Component {
                             @error('fee_type') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
-                        <div>
+                        {{-- <div>
                             <label class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-2" for="amount">
                                 Amount
                             </label>
                             <input wire:model="amount" type="number" step="0.01"
                                 class="w-full px-4 py-2 rounded-lg border bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
                             @error('amount') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                        </div>
+                        </div> --}}
 
                         <div>
                             <label class="block text-sm font-medium text-zinc-600 dark:text-zinc-300 mb-2" for="invoice_file">

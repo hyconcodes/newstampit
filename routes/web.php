@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OtpController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -79,6 +80,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // dummy/testing route
     // Route::get('invoice/download')->name('invoices.edit');
+});
+Route::get('/verify-otp/{user}', [OtpController::class, 'showVerifyForm'])->name('otp.verify');
+Route::post('/verify-otp/{user}', [OtpController::class, 'verify'])->name('otp.check');
+
+Route::get('/test-otp-mail', function () {
+    return new \App\Mail\OtpMail(445588);
 });
 
 require __DIR__ . '/auth.php';

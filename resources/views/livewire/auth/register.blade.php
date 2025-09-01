@@ -24,54 +24,91 @@ new #[Layout('components.layouts.auth')] class extends Component {
     /**
      * Handle an incoming registration request.
      */
+    // public function register(): void
+    // {
+    //     $validated = $this->validate([
+    //         'name' => ['required', 'string', 'max:255'],
+    //         'school_id' => ['required', 'exists:schools,id'],
+    //         'email' => [
+    //             'required',
+    //             'string',
+    //             'lowercase',
+    //             'email',
+    //             'max:255',
+    //             'unique:' . User::class,
+    //             'regex:/^[a-zA-Z0-9.]+\.[0-9]+@bouesti\.edu\.ng$/',
+    //             function($attribute, $value, $fail) {
+    //                 if (!str_ends_with($value, '@bouesti.edu.ng')) {
+    //                     $fail('Please use your school email address (@bouesti.edu.ng).');
+    //                 }
+
+    //                 $parts = explode('.', explode('@', $value)[0]);
+    //                 if (count($parts) < 2) {
+    //                     $fail('Invalid email format.');
+    //                     return;
+    //                 }
+
+    //                 $matric_number = $parts[1];
+
+    //                 $exists = User::where('email', 'LIKE', '%.' . $matric_number . '@bouesti.edu.ng')->exists();
+    //                 if ($exists) {
+    //                     $fail('A student with this matric number already exists.');
+    //                 }
+    //             }
+    //         ],
+    //         'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+    //     ]);
+
+    //     $validated['password'] = Hash::make($validated['password']);
+
+    //     // Extract matric number from email
+    //     $parts = explode('.', explode('@', $validated['email'])[0]);
+    //     $validated['matric_no'] = $parts[1];
+
+    //     event(new Registered(($user = User::create($validated))));
+
+    //     $user->assignRole('student');
+
+    //     Auth::login($user);
+
+    //     $this->redirectIntended(route('dashboard', absolute: false), navigate: true);
+    // }
+
     public function register(): void
     {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'school_id' => ['required', 'exists:schools,id'],
-            'email' => [
-                'required', 
-                'string', 
-                'lowercase', 
-                'email', 
-                'max:255', 
-                'unique:' . User::class,
-                'regex:/^[a-zA-Z0-9.]+\.[0-9]+@bouesti\.edu\.ng$/',
-                function($attribute, $value, $fail) {
-                    if (!str_ends_with($value, '@bouesti.edu.ng')) {
-                        $fail('Please use your school email address (@bouesti.edu.ng).');
-                    }
-                    
-                    $parts = explode('.', explode('@', $value)[0]);
-                    if (count($parts) < 2) {
-                        $fail('Invalid email format.');
-                        return;
-                    }
-                    
-                    $matric_number = $parts[1];
-                    
-                    $exists = User::where('email', 'LIKE', '%.' . $matric_number . '@bouesti.edu.ng')->exists();
-                    if ($exists) {
-                        $fail('A student with this matric number already exists.');
-                    }
-                }
-            ],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class, 'regex:/^[a-zA-Z0-9.]+\.[0-9]+@bouesti\.edu\.ng$/'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
-        
-        // Extract matric number from email
+
+        // Extract matric number
         $parts = explode('.', explode('@', $validated['email'])[0]);
         $validated['matric_no'] = $parts[1];
 
-        event(new Registered(($user = User::create($validated))));
-
+        $user = User::create($validated);
         $user->assignRole('student');
 
-        Auth::login($user);
+        // 🔹 Generate 6-digit OTP
+        $otp = rand(100000, 999999);
 
-        $this->redirectIntended(route('dashboard', absolute: false), navigate: true);
+        \DB::table('user_otps')->insert([
+            'user_id' => $user->id,
+            'otp' => Hash::make($otp),
+            'expires_at' => now()->addMinutes(10),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 🔹 Send OTP via mail (create Mailable)
+        \Mail::to($user->email)->send(new \App\Mail\OtpMail($otp));
+
+        // 🔹 Redirect to OTP verification page
+        Auth::login($user);
+        $this->redirectRoute('otp.verify', ['user' => $user->id], navigate: true);
     }
 }; ?>
 
@@ -84,59 +121,28 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     <form wire:submit="register" class="flex flex-col gap-6">
         <!-- Name -->
-        <flux:input
-            wire:model="name"
-            :label="__('Name')"
-            type="text"
-            required
-            autofocus
-            autocomplete="name"
-            :placeholder="__('Full name')"
-        />
+        <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name"
+            :placeholder="__('Full name')" />
 
         <!-- School -->
-        <flux:select
-            wire:model="school_id"
-            :label="__('School')"
-            required
-        >
+        <flux:select wire:model="school_id" :label="__('School')" required>
             <option value="">Select your school</option>
-            @foreach($this->schools() as $school)
+            @foreach ($this->schools() as $school)
                 <option value="{{ $school->id }}">{{ $school->name }}</option>
             @endforeach
         </flux:select>
 
         <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email address')"
-            type="email"
-            required
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
+        <flux:input wire:model="email" :label="__('Email address')" type="email" required autocomplete="email"
+            placeholder="email@example.com" />
 
         <!-- Password -->
-        <flux:input
-            wire:model="password"
-            :label="__('Password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Password')"
-            viewable
-        />
+        <flux:input wire:model="password" :label="__('Password')" type="password" required autocomplete="new-password"
+            :placeholder="__('Password')" viewable />
 
         <!-- Confirm Password -->
-        <flux:input
-            wire:model="password_confirmation"
-            :label="__('Confirm password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Confirm password')"
-            viewable
-        />
+        <flux:input wire:model="password_confirmation" :label="__('Confirm password')" type="password" required
+            autocomplete="new-password" :placeholder="__('Confirm password')" viewable />
 
         <div class="flex items-center justify-end">
             <flux:button type="submit" variant="primary" class="w-full bg-green-600 hover:bg-green-700">
@@ -147,6 +153,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
         {{ __('Already have an account?') }}
-        <flux:link :href="route('login')" wire:navigate class="text-green-600 hover:text-green-700">{{ __('Log in') }}</flux:link>
+        <flux:link :href="route('login')" wire:navigate class="text-green-600 hover:text-green-700">{{ __('Log in') }}
+        </flux:link>
     </div>
 </div>

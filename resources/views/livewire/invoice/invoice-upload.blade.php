@@ -61,7 +61,7 @@ new class extends Component {
                 'invoice_file.max' => 'The invoice file must be less than 2MB.',
                 'rrr.size' => 'The RRR number must be exactly 12 digits.',
                 'rrr.unique' => 'Used RRR number.',
-                'rrr.required' => 'The RRR number is required.',
+                'rrr.required' => "Unable to get the RRR number, it's required and must be valid.",
             ];
 
             $this->validate($validationRules, $validationMessages);
