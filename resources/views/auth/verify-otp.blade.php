@@ -59,6 +59,12 @@
                     Verify
                 </button>
             </form>
+            <form method="POST" action="{{ route('logout') }}" class="mt-2 w-full flex flex-col items-center">
+                @csrf
+                <button type="submit" class="w-full bg-red-200 hover:bg-red-300 text-red-800 font-medium py-2 px-4 rounded-md transition duration-200 text-base">
+                    Log out
+                </button>
+            </form>
             <form method="POST" action="{{ route('otp.resend', $user->id) }}" class="mt-4 w-full flex flex-col items-center">
                 @csrf
                 <button type="submit" class="w-full bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-medium py-2 px-4 rounded-md transition duration-200 text-base">
