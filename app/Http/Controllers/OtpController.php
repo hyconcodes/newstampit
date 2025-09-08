@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class OtpController extends Controller
 {
@@ -38,5 +39,21 @@ class OtpController extends Controller
         $user->update(['email_verified_at' => now()]);
 
         return redirect()->route('student.dashboard')->with('status', 'Your account has been verified!');
+    }
+
+    public function resend(User $user)
+    {
+        // Generate new OTP
+        $otp = rand(100000, 999999);
+        DB::table('user_otps')->insert([
+            'user_id' => $user->id,
+            'otp' => Hash::make($otp),
+            'expires_at' => now()->addMinutes(10),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        // Send OTP via mail
+        Mail::to($user->email)->send(new \App\Mail\OtpMail($otp));
+        return redirect()->route('otp.verify', $user->id)->with('success', 'A new OTP has been sent to your email.');
     }
 }

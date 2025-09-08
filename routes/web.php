@@ -13,7 +13,7 @@ Route::view('dashboard', 'dashboard')
     ->name('dashboard');
 
 Volt::route('student/dashboard', 'students.dashboard')
-    ->middleware(['auth', 'verified', 'role:student'])
+    ->middleware(['auth', 'verified.otp', 'role:student'])
     ->name('student.dashboard');
 
 Volt::route('admin/dashboard', 'admins.dashboard')
@@ -83,6 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 Route::get('/verify-otp/{user}', [OtpController::class, 'showVerifyForm'])->name('otp.verify');
 Route::post('/verify-otp/{user}', [OtpController::class, 'verify'])->name('otp.check');
+Route::post('/resend-otp/{user}', [OtpController::class, 'resend'])->name('otp.resend');
 
 Route::get('/test-otp-mail', function () {
     return new \App\Mail\OtpMail(445588);

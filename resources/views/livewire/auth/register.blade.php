@@ -79,7 +79,26 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'school_id' => ['required', 'exists:schools,id'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class, 'regex:/^[a-zA-Z0-9.]+\.[0-9]+@bouesti\.edu\.ng$/'],
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                'unique:' . User::class,
+                'regex:/^[a-zA-Z0-9.]+\.[0-9]+@bouesti\.edu\.ng$/',
+                function($attribute, $value, $fail) {
+                    $parts = explode('.', explode('@', $value)[0]);
+                    if (count($parts) < 2) {
+                        $fail('Invalid email format.');
+                        return;
+                    }
+                    $matric_no = $parts[1];
+                    if (User::where('matric_no', $matric_no)->exists()) {
+                        $fail('A student with this matric number already exists.');
+                    }
+                }
+            ],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
