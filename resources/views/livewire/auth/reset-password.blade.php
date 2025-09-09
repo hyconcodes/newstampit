@@ -20,49 +20,50 @@ new #[Layout('components.layouts.auth')] class extends Component {
     /**
      * Mount the component.
      */
-    public function mount(string $token): void
+    public function mount(): void
     {
-        $this->token = $token;
-
-        $this->email = request()->string('email');
+        // Check if user has valid OTP verification session
+        if (!session('password_reset_user_id')) {
+            $this->redirectRoute('password.request', navigate: true);
+        }
     }
 
     /**
-     * Reset the password for the given user.
+     * Reset the password for the given user using OTP verification.
      */
     public function resetPassword(): void
     {
         $this->validate([
-            'token' => ['required'],
-            'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
-            $this->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) {
-                $user->forceFill([
-                    'password' => Hash::make($this->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
-
-                event(new PasswordReset($user));
-            }
-        );
-
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        if ($status != Password::PasswordReset) {
-            $this->addError('email', __($status));
-
+        // Get user ID from session (set during OTP verification)
+        $userId = session('password_reset_user_id');
+        
+        if (!$userId) {
+            $this->addError('password', 'Invalid session. Please request a new password reset.');
             return;
         }
 
-        Session::flash('status', __($status));
+        $user = \App\Models\User::find($userId);
+        
+        if (!$user) {
+            $this->addError('password', 'User not found. Please request a new password reset.');
+            return;
+        }
+
+        // Update the password
+        $user->forceFill([
+            'password' => Hash::make($this->password),
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        // Clear the session
+        session()->forget('password_reset_user_id');
+
+        event(new PasswordReset($user));
+
+        Session::flash('status', 'Your password has been reset successfully.');
 
         $this->redirectRoute('login', navigate: true);
     }

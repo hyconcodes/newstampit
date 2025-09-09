@@ -8,27 +8,40 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $email = '';
 
     /**
-     * Send a password reset link to the provided email address.
+     * Send a password reset OTP to the provided email address.
      */
-    public function sendPasswordResetLink(): void
+    public function sendPasswordResetOtp(): void
     {
         $this->validate([
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email', 'exists:users,email'],
         ]);
 
-        Password::sendResetLink($this->only('email'));
+        $user = \App\Models\User::where('email', $this->email)->first();
+        
+        // Generate OTP for password reset
+        $otp = rand(100000, 999999);
+        \DB::table('user_otps')->insert([
+            'user_id' => $user->id,
+            'otp' => \Hash::make($otp),
+            'expires_at' => now()->addMinutes(10),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-        session()->flash('status', __('A reset link will be sent if the account exists.'));
+        // Send OTP via mail
+        \Mail::to($user->email)->send(new \App\Mail\OtpMail($otp));
+
+        $this->redirectRoute('password.reset.otp.verify', ['user' => $user->id], navigate: true);
     }
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
+    <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset OTP')" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
 
-    <form wire:submit="sendPasswordResetLink" class="flex flex-col gap-6">
+    <form wire:submit="sendPasswordResetOtp" class="flex flex-col gap-6">
         <!-- Email Address -->
         <flux:input
             wire:model="email"
@@ -40,7 +53,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             viewable
         />
 
-        <flux:button variant="primary" type="submit" class="w-full bg-green-600 hover:bg-green-700">{{ __('Email password reset link') }}</flux:button>
+        <flux:button variant="primary" type="submit" class="w-full bg-green-600 hover:bg-green-700">{{ __('Send password reset OTP') }}</flux:button>
     </form>
 
     <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">

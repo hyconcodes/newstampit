@@ -85,6 +85,12 @@ Route::get('/verify-otp/{user}', [OtpController::class, 'showVerifyForm'])->name
 Route::post('/verify-otp/{user}', [OtpController::class, 'verify'])->name('otp.check');
 Route::post('/resend-otp/{user}', [OtpController::class, 'resend'])->name('otp.resend');
 
+// Password reset OTP routes
+Route::post('/password-reset-otp', [OtpController::class, 'sendPasswordResetOtp'])->name('password.reset.otp.send');
+Route::get('/password-reset-otp/{user}', [OtpController::class, 'showPasswordResetOtpVerifyForm'])->name('password.reset.otp.verify');
+Route::post('/password-reset-otp/{user}', [OtpController::class, 'verifyPasswordResetOtp'])->name('password.reset.otp.check');
+Route::post('/password-reset-otp-resend/{user}', [OtpController::class, 'resend'])->name('password.reset.otp.resend');
+
 Route::get('/test-otp-mail', function () {
     return new \App\Mail\OtpMail(445588);
 });

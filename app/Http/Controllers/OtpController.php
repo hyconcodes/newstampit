@@ -56,4 +56,63 @@ class OtpController extends Controller
         Mail::to($user->email)->send(new \App\Mail\OtpMail($otp));
         return redirect()->route('otp.verify', $user->id)->with('success', 'A new OTP has been sent to your email.');
     }
+
+    public function showPasswordResetOtpForm()
+    {
+        return view('auth.verify-password-reset-otp');
+    }
+
+    public function sendPasswordResetOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        
+        // Generate OTP for password reset
+        $otp = rand(100000, 999999);
+        DB::table('user_otps')->insert([
+            'user_id' => $user->id,
+            'otp' => Hash::make($otp),
+            'expires_at' => now()->addMinutes(10),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Send OTP via mail
+        Mail::to($user->email)->send(new \App\Mail\OtpMail($otp));
+
+        return redirect()->route('password.reset.otp.verify', $user->id)->with('success', 'Password reset OTP sent to your email.');
+    }
+
+    public function showPasswordResetOtpVerifyForm(User $user)
+    {
+        return view('auth.verify-password-reset-otp', compact('user'));
+    }
+
+    public function verifyPasswordResetOtp(Request $request, User $user)
+    {
+        $request->validate([
+            'otp' => 'required|digits:6',
+        ]);
+
+        $otpRecord = DB::table('user_otps')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->first();
+
+        if (!$otpRecord || now()->greaterThan($otpRecord->expires_at)) {
+            return back()->withErrors(['otp' => 'OTP expired. Please request a new one.']);
+        }
+
+        if (!Hash::check($request->otp, $otpRecord->otp)) {
+            return back()->withErrors(['otp' => 'Invalid OTP']);
+        }
+
+        // Store user ID in session for password reset
+        session(['password_reset_user_id' => $user->id]);
+        
+        return redirect()->route('password.reset')->with('success', 'OTP verified. Please enter your new password.');
+    }
 }
