@@ -1,6 +1,10 @@
 <?php
 
 use Livewire\Volt\Component;
+use App\Services\PdfStampingService;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvoiceStampedMail;
 
 new class extends Component {
     public $search = '';
@@ -34,10 +38,58 @@ new class extends Component {
 
     public function stamp($invoiceId)
     {
-        $invoice = \App\Models\Invoice::findOrFail($invoiceId);
-        $invoice->update(['status' => 'stamped']);
+        try {
+            $invoice = \App\Models\Invoice::findOrFail($invoiceId);
+            
+            // Get the original PDF path
+            $originalPdfPath = storage_path('app/public/' . $invoice->invoice_file);
+            
+            if (!file_exists($originalPdfPath)) {
+                session()->flash('error', 'Invoice file not found');
+                return;
+            }
 
-        $this->dispatch('invoice-stamped');
+            // Create stamping service instance
+            $stampingService = new PdfStampingService();
+            
+            // Apply digital stamp to PDF
+            $stampedPdfPath = $stampingService->stampPdf($originalPdfPath, auth()->id());
+            
+            // Generate new filename for stamped version
+            $pathInfo = pathinfo($invoice->invoice_file);
+            $stampedFileName = $pathInfo['filename'] . '_stamped.' . $pathInfo['extension'];
+            
+            // Move stamped PDF to stamped invoices directory
+            $finalStampedPath = 'stamped-invoices/' . $stampedFileName;
+            Storage::disk('public')->put($finalStampedPath, file_get_contents($stampedPdfPath));
+            
+            // Update invoice with stamped file and status
+            $invoice->update([
+                'status' => 'stamped',
+                'stamped_file' => $finalStampedPath,
+                'stamped_by' => auth()->id(),
+                'stamped_at' => now()
+            ]);
+
+            // Clean up temporary stamped file
+            if (file_exists($stampedPdfPath)) {
+                unlink($stampedPdfPath);
+            }
+
+            // Send email notification to student
+            try {
+                Mail::to($invoice->user->email)->send(new InvoiceStampedMail($invoice));
+            } catch (\Exception $emailError) {
+                // Log email error but don't fail the stamping process
+                \Log::error('Failed to send stamped invoice email: ' . $emailError->getMessage());
+            }
+
+            $this->dispatch('invoice-stamped');
+            session()->flash('success', 'Invoice stamped successfully and notification sent to student!');
+            
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error stamping invoice: ' . $e->getMessage());
+        }
     }
 }; ?>
 
@@ -84,11 +136,6 @@ new class extends Component {
                             <span class="text-zinc-900 dark:text-zinc-100">{{ $invoice->rrr }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-zinc-600 dark:text-zinc-300">Amount</span>
-                            <span
-                                class="text-zinc-900 dark:text-zinc-100">₦{{ number_format($invoice->amount, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between">
                             <span class="text-zinc-600 dark:text-zinc-300">Date</span>
                             <span
                                 class="text-zinc-900 dark:text-zinc-100">{{ $invoice->created_at->format('M d, Y') }}</span>
@@ -103,10 +150,10 @@ new class extends Component {
                     </div>
 
                     @if($invoice->status === 'pending')
-                        <button wire:click="stamp({{ $invoice->id }})"
-                            class="w-full mt-4 px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700">
+                        <flux:button wire:click="stamp({{ $invoice->id }})"
+                            class="w-full mt-4 px-3 py-2 text-sm !bg-green-500 !text-white rounded !hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700">
                             Stamp Document
-                        </button>
+                        </flux:button>
                     @endif
                 </div>
             @empty

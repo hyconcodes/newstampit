@@ -78,6 +78,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('stamp.igrs.invoices')
         ->middleware('permission:|stamp.igr.invoices');
 
+    //route for admins to manage their signature
+    Volt::route('admin/signature', 'admins.signature')
+        ->name('admin.signature')
+        ->middleware('permission:|stamp.school.fees.invoices|stamp.igr.invoices');
+
+    //route for admins to manage stamps
+    Volt::route('admin/stamps', 'admins.stamps')
+        ->name('admin.stamps')
+        ->middleware('permission:|stamp.school.fees.invoices|stamp.igr.invoices');
+
+    // Route for downloading stamped invoices
+    Route::get('/download/stamped-invoice/{invoice}', function ($invoice) {
+        $invoice = \App\Models\Invoice::findOrFail($invoice);
+        
+        // Check if stamped file exists
+        if (!$invoice->stamped_file) {
+            abort(404, 'Stamped invoice not found.');
+        }
+        
+        $filePath = storage_path('app/public/' . $invoice->stamped_file);
+        
+        if (!file_exists($filePath)) {
+            abort(404, 'Stamped invoice file not found.');
+        }
+        
+        // Generate descriptive filename
+        $feeType = ucfirst(str_replace('_', ' ', $invoice->fee_type));
+        $fileName = "Stamped_{$feeType}_Receipt_{$invoice->rrr}.pdf";
+        
+        return response()->download($filePath, $fileName);
+    })->name('download.stamped.invoice');
+
     // dummy/testing route
     // Route::get('invoice/download')->name('invoices.edit');
 });

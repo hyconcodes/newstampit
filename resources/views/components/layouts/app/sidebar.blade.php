@@ -57,6 +57,19 @@
                 @endcan
             </flux:navlist.group>
         </flux:navlist>
+        
+        <flux:navlist variant="outline">
+            <flux:navlist.group :heading="__('Admin Tools')" class="grid" expandable>
+                @canany(['stamp.school.fees.invoices', 'stamp.igr.invoices'])
+                    <flux:navlist.item icon="pencil" :href="route('admin.signature')"
+                        :current="request()->routeIs('admin.signature')" wire:navigate>{{ __('Digital Signature') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="document-duplicate" :href="route('admin.stamps')"
+                        :current="request()->routeIs('admin.stamps')" wire:navigate>{{ __('Stamp Management') }}
+                    </flux:navlist.item>
+                @endcanany
+            </flux:navlist.group>
+        </flux:navlist>
 
         <flux:spacer />
 

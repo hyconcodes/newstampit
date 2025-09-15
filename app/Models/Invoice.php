@@ -11,6 +11,9 @@ class Invoice extends Model
         'fee_type',
         'amount',
         'invoice_file',
+        'stamped_file',
+        'stamped_by',
+        'stamped_at',
         'user_id',
         'status',
         'comment',
@@ -24,4 +27,13 @@ class Invoice extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function stampedBy()
+    {
+        return $this->belongsTo(User::class, 'stamped_by');
+    }
+
+    protected $casts = [
+        'stamped_at' => 'datetime',
+    ];
 }
