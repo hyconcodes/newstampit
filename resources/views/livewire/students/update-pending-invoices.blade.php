@@ -49,7 +49,7 @@ new class extends Component {
     <div class="relative p-2 sm:p-2 lg:p-8 mb-20">
         <div class="fixed inset-0 -z-10 overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-neutral-950 dark:to-neutral-900">
-                <x-floating-icons />
+                <!-- Background Gradient -->
             </div>
         </div>
     @include('includes.alert')

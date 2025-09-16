@@ -1,8 +1,7 @@
 <div class="relative">
     <div class="fixed inset-0 -z-10 overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-neutral-950 dark:to-neutral-900">
-            <!-- Floating Background Elements -->
-           <x-floating-icons/>
+            <!-- Background Gradient -->
         </div>
     </div>
 

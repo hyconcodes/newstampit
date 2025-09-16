@@ -256,7 +256,7 @@
             <!-- Call to Action -->
             <div class="cta-section">
                 <div class="button-group">
-                    <a href="{{ url('/dashboard') }}" class="cta-button">
+                    <a href="{{ url('/student/dashboard') }}" class="cta-button">
                         View Dashboard
                     </a>
                     @if($invoice->stamped_file)
