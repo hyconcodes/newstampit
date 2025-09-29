@@ -124,15 +124,15 @@ new class extends Component {
                         </div>
 
                         <!-- Actions -->
-                        <div class="mt-6 flex flex-wrap gap-2">
-                            <a href="{{ route('student.update-pending.invoices', $invoice->id) }}"
-                                class="w-1/2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors text-center">
+                        <div class="mt-6 flex gap-2">
+                            <flux:button size='sm' href="{{ route('student.update-pending.invoices', $invoice->id) }}"
+                                class="flex-1 px-1 py-2 text-sm !bg-blue-500 !text-white rounded-lg hover:!bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors text-center">
                                 Update
-                            </a>
-                            <button wire:click="confirmCancel({{ $invoice->id }})"
-                                class="w-1/2 px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition-colors">
+                            </flux:button>
+                            <flux:button size='sm' wire:click="confirmCancel({{ $invoice->id }})"
+                                class="flex-1 px-1 py-2 text-sm !bg-red-500 !text-white rounded-lg hover:!bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition-colors">
                                 Cancel
-                            </button>
+                            </flux:button>
                         </div>
                     </div>
                 </div>

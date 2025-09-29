@@ -20,15 +20,19 @@ new class extends Component {
         return [
             'invoices' => \App\Models\Invoice::query()
                 ->where('fee_type', 'igr')
-                ->when($this->statusFilter, function($query) {
-                    $query->where('status', $this->statusFilter);
-                }, function($query) {
-                    $query->whereIn('status', ['pending', 'stamped']);
-                })
+                ->when(
+                    $this->statusFilter,
+                    function ($query) {
+                        $query->where('status', $this->statusFilter);
+                    },
+                    function ($query) {
+                        $query->whereIn('status', ['pending', 'stamped']);
+                    },
+                )
                 ->when($this->search, function ($query) {
                     $query->where('rrr', 'like', '%' . $this->search . '%');
                 })
-                ->when($this->startDate && $this->endDate, function($query) {
+                ->when($this->startDate && $this->endDate, function ($query) {
                     $query->whereBetween('created_at', [$this->startDate, $this->endDate]);
                 })
                 ->latest()
@@ -40,10 +44,10 @@ new class extends Component {
     {
         try {
             $invoice = \App\Models\Invoice::findOrFail($invoiceId);
-            
+
             // Get the original PDF path
             $originalPdfPath = storage_path('app/public/' . $invoice->invoice_file);
-            
+
             if (!file_exists($originalPdfPath)) {
                 session()->flash('error', 'Invoice file not found');
                 return;
@@ -51,24 +55,24 @@ new class extends Component {
 
             // Create stamping service instance
             $stampingService = new PdfStampingService();
-            
+
             // Apply digital stamp to PDF
             $stampedPdfPath = $stampingService->stampPdf($originalPdfPath, auth()->id());
-            
+
             // Generate new filename for stamped version
             $pathInfo = pathinfo($invoice->invoice_file);
             $stampedFileName = $pathInfo['filename'] . '_stamped.' . $pathInfo['extension'];
-            
+
             // Move stamped PDF to stamped invoices directory
             $finalStampedPath = 'stamped-invoices/' . $stampedFileName;
             Storage::disk('public')->put($finalStampedPath, file_get_contents($stampedPdfPath));
-            
+
             // Update invoice with stamped file and status
             $invoice->update([
                 'status' => 'stamped',
                 'stamped_file' => $finalStampedPath,
                 'stamped_by' => auth()->id(),
-                'stamped_at' => now()
+                'stamped_at' => now(),
             ]);
 
             // Clean up temporary stamped file
@@ -86,7 +90,6 @@ new class extends Component {
 
             $this->dispatch('invoice-stamped');
             session()->flash('success', 'Invoice stamped successfully and notification sent to student!');
-            
         } catch (\Exception $e) {
             session()->flash('error', 'Error stamping invoice: ' . $e->getMessage());
         }
@@ -104,12 +107,12 @@ new class extends Component {
         @include('includes.alert')
 
         <div class="max-w-7xl mx-auto mb-8">
-            <h2 class="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">School Fees
+            <h2 class="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">IGRs Fees
                 Documents</h2>
             <div class="flex flex-col sm:flex-row gap-4 mb-8">
                 <input wire:model.live="search" type="text" placeholder="Search by RRR number..."
                     class="w-full sm:w-auto px-4 py-2 border rounded-lg bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
-                
+
                 <select wire:model.live="statusFilter"
                     class="w-full sm:w-auto px-4 py-2 border rounded-lg bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
                     <option value="">All</option>
@@ -117,9 +120,9 @@ new class extends Component {
                     <option value="stamped">Stamped</option>
                 </select>
 
-                <input wire:model.live="startDate" type="date" 
+                <input wire:model.live="startDate" type="date"
                     class="w-full sm:w-auto px-4 py-2 border rounded-lg bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
-                
+
                 <input wire:model.live="endDate" type="date"
                     class="w-full sm:w-auto px-4 py-2 border rounded-lg bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
             </div>
@@ -131,8 +134,16 @@ new class extends Component {
                     <x-admin-pdf-viewer :invoice-id="$invoice->id" :invoice-file="$invoice->invoice_file" :status="$invoice->status" buttonText="" />
 
                     <div class="mt-4 space-y-2 text-sm">
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center relative group">
                             <span class="text-zinc-600 dark:text-zinc-300">RRR #</span>
+                            <button onclick="navigator.clipboard.writeText('{{ $invoice->rrr }}');"
+                                class="absolute bg-green-400 rounded-2xl cursor-pointer right-0 top-0 h-full px-2 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                                title="Copy RRR">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            </button>
                             <span class="text-zinc-900 dark:text-zinc-100">{{ $invoice->rrr }}</span>
                         </div>
                         <div class="flex justify-between">
@@ -149,7 +160,7 @@ new class extends Component {
                         </div>
                     </div>
 
-                    @if($invoice->status === 'pending')
+                    @if ($invoice->status === 'pending')
                         <flux:button wire:click="stamp({{ $invoice->id }})"
                             class="w-full mt-4 px-3 py-2 text-sm !bg-green-500 !text-white rounded !hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700">
                             Stamp Document

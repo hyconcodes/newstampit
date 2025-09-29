@@ -187,24 +187,99 @@
             margin-bottom: 10px;
         }
         
+        /* Small screen responsive fixes */
         @media (max-width: 600px) {
+            body {
+                background-color: #ffffff;
+            }
+            
             .email-container {
-                margin: 10px;
-                border-radius: 8px;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
             }
             
             .header, .content, .footer {
-                padding: 20px;
+                padding: 20px 16px;
+            }
+            
+            .header {
+                padding: 30px 16px;
             }
             
             .header h1 {
-                font-size: 24px;
+                font-size: 22px;
+            }
+            
+            .header p {
+                font-size: 14px;
             }
             
             .success-icon {
                 width: 60px;
                 height: 60px;
                 font-size: 30px;
+                margin-bottom: 16px;
+            }
+            
+            .greeting {
+                font-size: 16px;
+            }
+            
+            .message {
+                font-size: 14px;
+            }
+            
+            .invoice-details {
+                padding: 16px;
+                margin: 20px 0;
+            }
+            
+            .invoice-details h3 {
+                font-size: 16px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 6px 0;
+            }
+            
+            .detail-label {
+                font-size: 14px;
+                margin-bottom: 2px;
+            }
+            
+            .detail-value {
+                font-size: 14px;
+            }
+            
+            .cta-section {
+                margin: 24px 0;
+            }
+            
+            .cta-button, .download-button {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 14px;
+                margin: 0 0 10px 0;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .footer {
+                padding: 20px 16px;
+            }
+            
+            .footer .logo {
+                font-size: 18px;
+            }
+            
+            .footer p {
+                font-size: 12px;
             }
         }
     </style>
@@ -214,7 +289,7 @@
         <!-- Header -->
         <div class="header">
             <div class="success-icon">✓</div>
-            <h1>Payment Verified!</h1>
+            <h1>Receipt Stamped!</h1>
             <p>Your {{ $feeType }} invoice has been successfully stamped</p>
         </div>
         

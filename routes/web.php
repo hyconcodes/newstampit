@@ -127,4 +127,8 @@ Route::get('/test-otp-mail', function () {
     return new \App\Mail\OtpMail(445588);
 });
 
+Route::get('/test-invoice-stamped-mail/{invoice}', function (\App\Models\Invoice $invoice) {
+    return new \App\Mail\InvoiceStampedMail($invoice);
+});
+
 require __DIR__ . '/auth.php';
