@@ -84,7 +84,7 @@ new class extends Component {
             $roleNames = $roles->pluck('name')->toArray();
             $staff->syncRoles($roleNames);
 
-            $staff->sendEmailVerificationNotification();
+            // $staff->sendEmailVerificationNotification();
 
             session()->flash('success', 'Staff member created successfully.');
         }

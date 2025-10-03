@@ -91,28 +91,41 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route for downloading stamped invoices
     Route::get('/download/stamped-invoice/{invoice}', function ($invoice) {
         $invoice = \App\Models\Invoice::findOrFail($invoice);
-        
+
         // Check if stamped file exists
         if (!$invoice->stamped_file) {
             abort(404, 'Stamped invoice not found.');
         }
-        
+
         $filePath = storage_path('app/public/' . $invoice->stamped_file);
-        
+
         if (!file_exists($filePath)) {
             abort(404, 'Stamped invoice file not found.');
         }
-        
+
         // Generate descriptive filename
         $feeType = ucfirst(str_replace('_', ' ', $invoice->fee_type));
         $fileName = "Stamped_{$feeType}_Receipt_{$invoice->rrr}.pdf";
-        
+
         return response()->download($filePath, $fileName);
     })->name('download.stamped.invoice');
 
     // dummy/testing route
     // Route::get('invoice/download')->name('invoices.edit');
+    Route::get('/migrate', function () {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return 'Migration executed successfully.';
+    })->name('migrate');
+
+    Route::get('/storage-link', function () {
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        return 'Storage link created successfully.';
+    })->name('storage.link');
 });
+
+
+
+// Guest
 Route::get('/verify-otp/{user}', [OtpController::class, 'showVerifyForm'])->name('otp.verify');
 Route::post('/verify-otp/{user}', [OtpController::class, 'verify'])->name('otp.check');
 Route::post('/resend-otp/{user}', [OtpController::class, 'resend'])->name('otp.resend');
@@ -130,5 +143,6 @@ Route::get('/test-otp-mail', function () {
 Route::get('/test-invoice-stamped-mail/{invoice}', function (\App\Models\Invoice $invoice) {
     return new \App\Mail\InvoiceStampedMail($invoice);
 });
+
 
 require __DIR__ . '/auth.php';

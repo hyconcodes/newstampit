@@ -1,0 +1,9 @@
+"serviceWorker"in navigator&&window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js").catch(()=>{})});let t;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault(),t=e,a()});window.addEventListener("appinstalled",()=>{n(),t=void 0});function a(){var i,l;if(document.getElementById("pwa-install-banner"))return;const e=document.createElement("div");e.id="pwa-install-banner",e.style.position="fixed",e.style.left="16px",e.style.right="16px",e.style.bottom="16px",e.style.zIndex="2147483647",e.style.background="#0f172a",e.style.border="1px solid #1f2a44",e.style.color="#e2e8f0",e.style.borderRadius="12px",e.style.padding="12px 14px",e.style.display="flex",e.style.alignItems="center",e.style.gap="12px",e.style.boxShadow="0 8px 24px rgba(2,6,23,0.45)",e.innerHTML=`
+    <img src="/favicon.svg" alt="" style="width:24px;height:24px" />
+    <div style="flex:1">
+      <div style="font-weight:700; font-size:14px">Install Stampit</div>
+      <div style="opacity:.8; font-size:12px">Get a faster, app-like experience.</div>
+    </div>
+    <button id="pwa-install-btn" style="background:#0ea5e9;color:#0b1220;border:0;padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer">Install</button>
+    <button id="pwa-install-close" aria-label="Close" style="background:transparent;color:#94a3b8;border:0;padding:6px 8px;border-radius:8px;cursor:pointer">Dismiss</button>
+  `,document.body.appendChild(e),(i=document.getElementById("pwa-install-btn"))==null||i.addEventListener("click",async()=>{if(!t)return;e.style.opacity="0.6",e.style.pointerEvents="none",t.prompt(),(await t.userChoice).outcome==="accepted"?n():(e.style.opacity="",e.style.pointerEvents=""),t=void 0}),(l=document.getElementById("pwa-install-close"))==null||l.addEventListener("click",n)}function n(){const e=document.getElementById("pwa-install-banner");e&&e.parentNode&&e.parentNode.removeChild(e)}
