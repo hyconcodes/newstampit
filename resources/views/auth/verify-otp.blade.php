@@ -40,12 +40,12 @@
                         Enter 6-digit OTP
                     </label>
                     <div class="flex justify-center gap-2">
-                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="moveToNext(this, 1)" data-index="1" disabled>
-                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="moveToNext(this, 2)" data-index="2" disabled>
-                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="moveToNext(this, 3)" data-index="3" disabled>
-                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="moveToNext(this, 4)" data-index="4" disabled>
-                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="moveToNext(this, 5)" data-index="5" disabled>
-                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="moveToNext(this, 6)" data-index="6" disabled>
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="handleInput(this, 1)" onkeydown="handleKeyDown(event, this, 1)" data-index="1">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="handleInput(this, 2)" onkeydown="handleKeyDown(event, this, 2)" data-index="2">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="handleInput(this, 3)" onkeydown="handleKeyDown(event, this, 3)" data-index="3">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="handleInput(this, 4)" onkeydown="handleKeyDown(event, this, 4)" data-index="4">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="handleInput(this, 5)" onkeydown="handleKeyDown(event, this, 5)" data-index="5">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" oninput="handleInput(this, 6)" onkeydown="handleKeyDown(event, this, 6)" data-index="6">
                         <input type="hidden" name="otp" id="otp">
                     </div>
                     @if($errors->has('otp'))
@@ -54,7 +54,7 @@
                         </div>
                     @endif
                 </div>
-                <button type="submit" id="verifyBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition duration-200 text-lg flex items-center justify-center" disabled>
+                <button type="submit" id="verifyBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition duration-200 text-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                     <span id="verifyText">Verify</span>
                     <svg id="verifyLoader" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -78,22 +78,51 @@
     </div>
 
     <script>
-        function moveToNext(field, index) {
+        // Auto-focus first input on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('input[data-index="1"]').focus();
+        });
+
+        function handleInput(field, index) {
+            // Only allow numbers
             field.value = field.value.replace(/[^0-9]/g, '');
+            
+            // Move to next field if value entered
             if (field.value && index < 6) {
                 const nextField = document.querySelector(`input[data-index="${index + 1}"]`);
                 if (nextField) nextField.focus();
             }
+            
+            // Check if all fields are filled
+            checkAllFieldsFilled();
         }
 
-        function combineOTP(event) {
+        function handleKeyDown(event, field, index) {
+            // Handle backspace
+            if (event.key === 'Backspace' && !field.value && index > 1) {
+                const prevField = document.querySelector(`input[data-index="${index - 1}"]`);
+                if (prevField) {
+                    prevField.focus();
+                }
+            }
+        }
+
+        function checkAllFieldsFilled() {
+            const inputs = document.querySelectorAll('input[data-index]');
+            const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+            
+            const verifyBtn = document.getElementById('verifyBtn');
+            verifyBtn.disabled = !allFilled;
+        }
+
+        function combineOTP() {
             const inputs = document.querySelectorAll('input[data-index]');
             const otpValue = Array.from(inputs).map(input => input.value).join('');
             document.getElementById('otp').value = otpValue;
         }
 
         function showLoader(event) {
-            combineOTP(event);
+            combineOTP();
             const verifyBtn = document.getElementById('verifyBtn');
             const verifyText = document.getElementById('verifyText');
             const verifyLoader = document.getElementById('verifyLoader');

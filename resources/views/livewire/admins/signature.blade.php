@@ -155,6 +155,16 @@ new #[Layout('components.layouts.app')] class extends Component
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 text-center">
                                     Draw your signature above using mouse or touch
                                 </p>
+                                <div class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                                    <div class="flex items-start gap-2">
+                                        <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                        </svg>
+                                        <p class="text-xs text-yellow-700 dark:text-yellow-300">
+                                            <strong>Note:</strong> If the signature pad is not responding or working properly, please refresh the page and try again.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
