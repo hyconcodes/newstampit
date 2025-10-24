@@ -86,7 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //route for admins to manage stamps
     Volt::route('admin/stamps', 'admins.stamps')
         ->name('admin.stamps')
-        ->middleware('permission:|stamp.school.fees.invoices|stamp.igr.invoices');
+        ->middleware(['auth', 'verified', 'role:super admin']);
 
     // Route for downloading stamped invoices
     Route::get('/download/stamped-invoice/{invoice}', function ($invoice) {

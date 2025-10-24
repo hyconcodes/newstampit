@@ -102,7 +102,7 @@ new class extends Component {
                 @if($temp_photo)
                     <img src="{{ $temp_photo }}" class="rounded-full h-20 w-20 object-cover mb-4">
                 @elseif(auth()->user()->picture)
-                    <img src="{{ asset('storage/' . auth()->user()->picture) }}" class="rounded-full h-20 w-20 object-cover mb-4">
+                    <img src="{{ asset('storage/app/public/' . auth()->user()->picture) }}" class="rounded-full h-20 w-20 object-cover mb-4">
                     {{-- <img src="{{ Storage::url(auth()->user()->picture) }}" class="rounded-full h-20 w-20 object-cover"> --}}
                 @endif
                 <flux:input type="file" wire:model="photo" :label="__('Profile Photo')" accept="image/*" class="w-full" />

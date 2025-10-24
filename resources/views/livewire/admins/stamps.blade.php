@@ -136,7 +136,7 @@ new #[Layout('components.layouts.app')] class extends Component
                 <div class="p-6">
                     @if($igrStamp && $igrStamp->image_url)
                         <div class="mb-4">
-                            <img src="{{ asset('storage/stamps/' . $igrStamp->image_url) }}" alt="IGR Stamp" class="max-h-32 mx-auto border rounded-lg shadow-sm bg-gray-50">
+                            <img src="{{ asset('storage/app/public/stamps/' . $igrStamp->image_url) }}" alt="IGR Stamp" class="max-h-32 mx-auto border rounded-lg shadow-sm bg-gray-50">
                         </div>
                         
                         <div class="flex flex-col gap-3">
@@ -179,7 +179,7 @@ new #[Layout('components.layouts.app')] class extends Component
                 <div class="p-6">
                     @if($schoolFeesStamp && $schoolFeesStamp->image_url)
                         <div class="mb-4">
-                            <img src="{{ asset('storage/stamps/' . $schoolFeesStamp->image_url) }}" alt="School Fees Stamp" class="max-h-32 mx-auto border rounded-lg shadow-sm bg-gray-50">
+                            <img src="{{ asset('storage/app/public/stamps/' . $schoolFeesStamp->image_url) }}" alt="School Fees Stamp" class="max-h-32 mx-auto border rounded-lg shadow-sm bg-gray-50">
                         </div>
                         
                         <div class="flex flex-col gap-3">

@@ -113,7 +113,7 @@ new #[Layout('components.layouts.app')] class extends Component
                         </div>
                         <div class="p-6">
                             <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-4 border-2 border-dashed border-gray-200 dark:border-gray-600">
-                                <img src="{{ asset('storage/' . $user->signature) }}" 
+                                <img src="{{ asset('storage/app/public/' . $user->signature) }}" 
                                      alt="Current Signature" 
                                      class="max-h-32 w-full object-contain bg-white rounded-lg shadow-sm">
                             </div>

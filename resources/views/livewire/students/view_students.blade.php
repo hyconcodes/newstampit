@@ -38,7 +38,7 @@ new class extends Component {
 
     <div class="flex flex-col sm:flex-row items-start justify-between mb-4">
         <div class="flex items-center space-x-3 mb-2 sm:mb-0">
-            <img src="{{ $student->picture ? asset('storage/' . $student->picture) : 'https://ui-avatars.com/api/?name=' . urlencode($student->name) }}"
+            <img src="{{ $student->picture ? asset('storage/app/public/' . $student->picture) : 'https://ui-avatars.com/api/?name=' . urlencode($student->name) }}"
                 alt="{{ $student->name }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-green-200" />
             <div>
                 <h3 class="font-semibold text-foreground dark:text-white">{{ $student->name }}</h3>

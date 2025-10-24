@@ -15,9 +15,20 @@
 
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Platform')" class="grid">
-                <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                    wire:navigate>{{ __('Dashboard') }}
-                </flux:navlist.item>
+@php
+    $dashboardRoute = auth()->user()->hasRole('student')
+        ? route('student.dashboard')
+        : (auth()->user()->hasRole('super admin')
+            ? route('dashboard')
+            : route('admins.dashboard'));
+    $dashboardCurrent = auth()->user()->hasRole('student')
+        ? request()->routeIs('student.dashboard')
+        : (auth()->user()->hasRole('super admin')
+            ? request()->routeIs('dashboard')
+            : request()->routeIs('admins.dashboard'));
+@endphp
+<flux:navlist.item icon="home" :href="$dashboardRoute" :current="$dashboardCurrent" wire:navigate>{{ __('Dashboard') }}
+</flux:navlist.item>
                 @canany(['view.roles', 'create.roles', 'edit.roles', 'delete.roles'])
                     <flux:navlist.item icon="shield-check" :href="route('roles')" :current="request()->routeIs('roles')"
                         wire:navigate>{{ __('Role') }}
@@ -43,6 +54,8 @@
                 @endcanany
             </flux:navlist.group>
         </flux:navlist>
+
+        @canany(['stamp.school.fees.invoices', 'stamp.igr.invoices'])
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Student Invoices')" class="grid" expandable>
                 @can(['stamp.school.fees.invoices'])
@@ -57,6 +70,29 @@
                 @endcan
             </flux:navlist.group>
         </flux:navlist>
+        @endcanany
+
+        {{-- Student Navigation Section --}}
+        @role('student')
+        <flux:navlist variant="outline">
+            <flux:navlist.group :heading="__('Student Portal')" class="grid" expandable>
+                <flux:navlist.item icon="home" :href="route('student.dashboard')" 
+                    :current="request()->routeIs('student.dashboard')" wire:navigate>
+                    {{ __('Dashboard') }}
+                </flux:navlist.item>
+                
+                <flux:navlist.item icon="document-text" :href="route('student.pending.invoices')" 
+                    :current="request()->routeIs('student.pending.invoices')" wire:navigate>
+                    {{ __('Upload Invoices') }}
+                </flux:navlist.item>
+                
+                <flux:navlist.item icon="document-check" :href="route('student.stamped-documents')" 
+                    :current="request()->routeIs('student.stamped-documents')" wire:navigate>
+                    {{ __('Stamped Documents') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
+        </flux:navlist>
+        @endrole
         
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Admin Tools')" class="grid" expandable>
@@ -64,10 +100,12 @@
                     <flux:navlist.item icon="pencil" :href="route('admin.signature')"
                         :current="request()->routeIs('admin.signature')" wire:navigate>{{ __('Digital Signature') }}
                     </flux:navlist.item>
+                @endcanany
+                @role('super admin')
                     <flux:navlist.item icon="document-duplicate" :href="route('admin.stamps')"
                         :current="request()->routeIs('admin.stamps')" wire:navigate>{{ __('Stamp Management') }}
                     </flux:navlist.item>
-                @endcanany
+                @endrole
             </flux:navlist.group>
         </flux:navlist>
 

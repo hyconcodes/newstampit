@@ -106,16 +106,32 @@ class PdfStampingService
         $stampWidth = $stampImage->width();
         $stampHeight = $stampImage->height();
         
-        // Add timestamp in the center with much larger, more visible text
+        // Create timestamp as a separate image for maximum control
         $timestamp = now()->format('d M Y');
-        $stampImage->text($timestamp, $stampWidth / 2, $stampHeight / 2 - 50, function ($font) {
-            // Use system default font with maximum size for ultimate visibility
-            $font->size(400);
-            $font->color('#1e40af'); // Blue color as requested
+        
+        // Calculate dimensions for timestamp image (make it large)
+        $timestampWidth = $stampWidth * 0.8; // 80% of stamp width
+        $timestampHeight = $stampHeight * 0.3; // 30% of stamp height
+        
+        // Create a new blank image for the timestamp
+        $timestampImage = $this->imageManager->create($timestampWidth, $timestampHeight);
+        
+        // Calculate much larger font size like HTML h1 tag (typically 2em or 32px equivalent)
+        // Making it proportionally much larger - like h1 which is typically 200% of normal text
+        $fontSize = min($timestampWidth * 0.4, $timestampHeight * 1.2); // Significantly increased for h1-like size
+        
+        // Add the timestamp text to the dedicated image
+        $timestampImage->text($timestamp, $timestampWidth / 2, $timestampHeight / 2, function ($font) use ($fontSize) {
+            $font->size($fontSize);
+            $font->color('#000080'); // Dark blue
             $font->align('center');
             $font->valign('middle');
-            $font->lineHeight(2.0); // Increased line height for taller text
         });
+        
+        // Place the timestamp image on the stamp
+        $timestampX = ($stampWidth - $timestampWidth) / 2;
+        $timestampY = ($stampHeight - $timestampHeight) / 2 - 50;
+        $stampImage->place($timestampImage, 'top-left', $timestampX, $timestampY);
 
         // Add admin signature if available - debug and fix placement
         if ($admin->signature) {

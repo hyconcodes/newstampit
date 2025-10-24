@@ -130,7 +130,7 @@
                 const container = document.getElementById(isPreview ? '{{ $previewId }}' : '{{ $viewerId }}').querySelector('div');
                 container.innerHTML = '<div class="animate-pulse"><div class="w-32 h-32 bg-zinc-200 dark:bg-zinc-600 rounded"></div></div>';
 
-                const url = "{{ asset('storage/' . $invoiceFile) }}";
+                const url = "{{ asset('storage/app/public/' . $invoiceFile) }}";
                 const loadingTask = pdfjsLib.getDocument(url);
 
                 try {
