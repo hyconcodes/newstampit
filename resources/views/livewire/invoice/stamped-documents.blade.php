@@ -16,6 +16,7 @@ new class extends Component {
     {
         $query = Invoice::where('user_id', auth()->id())
                        ->where('status', 'stamped')
+                       ->where('fee_type', '!=', 'school_fees')
                        ->with(['user'])
                        ->orderBy('stamped_at', 'desc');
 
@@ -74,7 +75,7 @@ new class extends Component {
         </h2>
     </x-slot>
 
-    <div class="py-6 sm:py-8 lg:py-12">
+    <div class="py-4 sm:py-4 lg:py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header Section -->
             <div class="bg-white dark:bg-zinc-800 overflow-hidden shadow-sm rounded-lg mb-4 sm:mb-6">
@@ -103,7 +104,6 @@ new class extends Component {
                             <select wire:model.live="feeType" 
                                 class="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border rounded-lg bg-white dark:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-600 focus:ring-2 focus:ring-green-500">
                                 <option value="">All Types</option>
-                                <option value="school_fees">School Fees</option>
                                 <option value="igr">IGR</option>
                             </select>
 

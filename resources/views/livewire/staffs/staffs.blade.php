@@ -22,7 +22,7 @@ new class extends Component {
     {
         return [
             'staffs' => User::whereHas('roles', function($query){
-                $query->whereNotIn('name', ['student', 'super admin']);
+                $query->whereNotIn('name', ['student', 'super admin', 'school fees admin']);
             })->where(function($query) {
                     $query->where('name', 'like', '%'.$this->search.'%')
                         ->orWhere('email', 'like', '%'.$this->search.'%');
@@ -30,7 +30,7 @@ new class extends Component {
                 ->with(['roles', 'school'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(10),
-            'roles' => Role::whereNotIn('name', ['student', 'super admin'])->get(),
+            'roles' => Role::whereNotIn('name', ['student', 'super admin', 'school fees admin'])->get(),
             'schools' => School::all()
         ];
     }
@@ -99,7 +99,8 @@ new class extends Component {
         $this->name = $staff->name;
         $this->email = $staff->email;
         $this->school_id = $staff->school_id;
-        $this->selectedRoles = $staff->roles->pluck('id')->toArray();
+        // Exclude deprecated role from preselected roles
+        $this->selectedRoles = $staff->roles->where('name', '!=', 'school fees admin')->pluck('id')->toArray();
     }
 
     public function confirmDelete($staffId)
@@ -216,9 +217,11 @@ new class extends Component {
                                         <div class="sm:hidden text-xs text-zinc-500 dark:text-zinc-400 mt-1">{{ $staff->school->name ?? "Not assign" }}</div>
                                         <div class="sm:hidden flex flex-wrap gap-1 mt-1">
                                             @foreach($staff->roles as $role)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                    {{ $role->name }}
-                                                </span>
+                                                @if($role->name !== 'school fees admin')
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                        {{ $role->name }}
+                                                    </span>
+                                                @endif
                                             @endforeach
                                         </div>
                                     </td>
@@ -226,9 +229,11 @@ new class extends Component {
                                     <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap dark:text-white">{{ $staff->school->name ?? "Not assign" }}</td>
                                     <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                         @foreach($staff->roles as $role)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 mr-1">
-                                                {{ $role->name }}
-                                            </span>
+                                            @if($role->name !== 'school fees admin')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 mr-1">
+                                                    {{ $role->name }}
+                                                </span>
+                                            @endif
                                         @endforeach
                                     </td>
                                     <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm">

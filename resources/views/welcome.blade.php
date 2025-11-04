@@ -76,11 +76,11 @@
                                     </a>
                                 @endhasanyrole
                             @else
-                                <a href="{{ route('login') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300">
+                                {{-- <a href="{{ route('login') }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300">
                                     Log in
-                                </a>
+                                </a> --}}
                                 @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                                    <a href="{{ route('register') }}" class="px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
                                         Get Started
                                     </a>
                                 @endif

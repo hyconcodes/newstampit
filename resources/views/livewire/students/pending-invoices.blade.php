@@ -23,7 +23,8 @@ new class extends Component {
             ->when($this->search, function ($query) {
                 $query->where('rrr', 'like', '%' . $this->search . '%');
             })
-            ->where('status', 'pending');
+            ->where('status', 'pending')
+            ->where('fee_type', '!=', 'school_fees');
 
         if ($this->selectedFeeType !== 'all') {
             $query->where('fee_type', $this->selectedFeeType);
@@ -73,10 +74,6 @@ new class extends Component {
                         class="px-4 py-2 rounded-lg {{ $selectedFeeType === 'all' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300' }}">
                         All
                     </button>
-                    <button wire:click="$set('selectedFeeType', 'school_fees')"
-                        class="px-4 py-2 rounded-lg {{ $selectedFeeType === 'school_fees' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300' }}">
-                        School Fees
-                    </button>
                     <button wire:click="$set('selectedFeeType', 'igr')"
                         class="px-4 py-2 rounded-lg {{ $selectedFeeType === 'igr' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300' }}">
                         IGR
@@ -102,7 +99,7 @@ new class extends Component {
                             <div class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Invoice type</span>
                                 <span
-                                    class="text-sm text-zinc-900 dark:text-zinc-100">{{ $invoice->fee_type === 'school_fees' ? 'School Fees Invoice' : 'IGR' }}</span>
+                                    class="text-sm text-zinc-900 dark:text-zinc-100">{{ strtoupper($invoice->fee_type) }}</span>
                             </div>
                             {{-- <div class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">Amount</span>

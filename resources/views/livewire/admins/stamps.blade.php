@@ -106,7 +106,8 @@ new #[Layout('components.layouts.app')] class extends Component
                 Stamp Management
             </h1>
             <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Upload and manage IGR and School Fees stamps for invoice stamping
+                {{-- Upload and manage IGR and School Fees stamps for invoice stamping --}}
+                Upload and manage IGR stamps for remita stamping
             </p>
         </div>
 
@@ -121,7 +122,7 @@ new #[Layout('components.layouts.app')] class extends Component
             </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-8">
             <!-- IGR Stamp -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
@@ -166,7 +167,7 @@ new #[Layout('components.layouts.app')] class extends Component
             </div>
 
             <!-- School Fees Stamp -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden hidden">
                 <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

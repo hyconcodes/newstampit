@@ -8,7 +8,7 @@ new class extends Component {
     use WithFileUploads;
 
     public $rrr;
-    public $fee_type;
+    public $fee_type = 'igr';
     public $invoice_file;
     public $extracted_numbers = [
         'remita' => null,
@@ -51,7 +51,7 @@ new class extends Component {
         try {
             // Different validation rules based on fee type
             $validationRules = [
-                'fee_type' => 'required|in:school_fees,igr',
+                'fee_type' => 'required|in:igr',
                 'invoice_file' => 'required|mimes:pdf|max:2048',
                 'rrr' => 'required|string|size:12|unique:invoices,rrr',
             ];
@@ -76,14 +76,6 @@ new class extends Component {
 
                 // if ($extractedRrr !== $this->rrr) {
                 //     throw new \Exception('The RRR number entered does not match the one in the PDF document.');
-                // }
-            } elseif ($this->fee_type === 'school_fees') {
-
-                // Extract digits from REMITA reference (e.g., REMITA-250819423315 -> 250819423315)
-                $extractedRrr = preg_replace('/[^0-9]/', '', $extractedData['remita']);
-
-                // if ($extractedRrr !== $this->rrr) {
-                //     throw new \Exception('The RRR number entered does not match the REMITA reference in the PDF document.');
                 // }
             }
 
@@ -118,7 +110,6 @@ new class extends Component {
             <flux:select wire:model="fee_type" id="fee_type"
                 class="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-600 shadow-sm dark:bg-zinc-700 dark:text-zinc-200">
                 <option value="">Select Fee Type</option>
-                <option value="school_fees">School Fees</option>
                 <option value="igr">IGR</option>
             </flux:select>
             @error('fee_type')
@@ -379,13 +370,11 @@ new class extends Component {
                     invoice = invoiceMatch[0];
                 }
 
-                // Decide what to fill into Livewire's `rrr`
-                if (remita) {
-                    // strip REMITA- and set RRR
-                    @this.set('rrr', remita.replace('REMITA-', ''));
-                } else if (invoice) {
-                    // remove hyphens and set RRR
+                // Prefer IGR pattern: use 12-digit hyphenated invoice number first
+                if (invoice) {
                     @this.set('rrr', invoice.replace(/-/g, ''));
+                } else if (remita) {
+                    @this.set('rrr', remita.replace('REMITA-', '').replace(/[^0-9]/g, ''));
                 }
 
                 console.log('Extracted:', {

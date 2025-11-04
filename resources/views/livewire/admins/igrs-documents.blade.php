@@ -107,7 +107,7 @@ new class extends Component {
         @include('includes.alert')
 
         <div class="max-w-7xl mx-auto mb-8">
-            <h2 class="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">IGRs Fees
+            <h2 class="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">Fees
                 Documents</h2>
             <div class="flex flex-col sm:flex-row gap-4 mb-8">
                 <input wire:model.live="search" type="text" placeholder="Search by RRR number..."

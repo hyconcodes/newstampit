@@ -57,15 +57,15 @@
 
         @canany(['stamp.school.fees.invoices', 'stamp.igr.invoices'])
         <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Student Invoices')" class="grid" expandable>
-                @can(['stamp.school.fees.invoices'])
+            <flux:navlist.group :heading="__('Student Receipts')" class="grid" expandable>
+                {{-- @can(['stamp.school.fees.invoices'])
                     <flux:navlist.item icon="document-check" :href="route('stamp.schoolfees.invoices')"
                         :current="request()->routeIs('stamp.schoolfees.invoices')" wire:navigate>{{ __('School fees invoices') }}
                     </flux:navlist.item>
-                @endcan
+                @endcan --}}
                 @can(['stamp.igr.invoices'])
                     <flux:navlist.item icon="document-check" :href="route('stamp.igrs.invoices')"
-                        :current="request()->routeIs('stamp.igrs.invoices')" wire:navigate>{{ __('IGRs invoices') }}
+                        :current="request()->routeIs('stamp.igrs.invoices')" wire:navigate>{{ __('Receipts') }}
                     </flux:navlist.item>
                 @endcan
             </flux:navlist.group>
@@ -81,8 +81,8 @@
                     {{ __('Dashboard') }}
                 </flux:navlist.item>
                 
-                <flux:navlist.item icon="document-text" :href="route('student.pending.invoices')" 
-                    :current="request()->routeIs('student.pending.invoices')" wire:navigate>
+                <flux:navlist.item icon="document-text" :href="route('invoice.upload')" 
+                    :current="request()->routeIs('invoice.upload')" wire:navigate>
                     {{ __('Upload Invoices') }}
                 </flux:navlist.item>
                 
