@@ -14,12 +14,19 @@ new class extends Component {
     public $statusFilter = '';
     public $startDate = '';
     public $endDate = '';
+    public $selectedInvoices = [];
+    public $selectAll = false;
 
     public function with(): array
     {
         return [
             'invoices' => \App\Models\Invoice::query()
                 ->where('fee_type', 'igr')
+                ->when(!auth()->user()->hasRole('super admin'), function($query) {
+                    $query->whereHas('user', function($q) {
+                        $q->where('school_id', auth()->user()->school_id);
+                    });
+                })
                 ->when(
                     $this->statusFilter,
                     function ($query) {
@@ -40,10 +47,39 @@ new class extends Component {
         ];
     }
 
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedInvoices = \App\Models\Invoice::query()
+                ->where('fee_type', 'igr')
+                ->where('status', 'pending')
+                ->when(!auth()->user()->hasRole('super admin'), function($query) {
+                    $query->whereHas('user', function($q) {
+                        $q->where('school_id', auth()->user()->school_id);
+                    });
+                })
+                ->when($this->search, function ($query) {
+                    $query->where('rrr', 'like', '%' . $this->search . '%');
+                })
+                ->when($this->startDate && $this->endDate, function ($query) {
+                    $query->whereBetween('created_at', [$this->startDate, $this->endDate]);
+                })
+                ->pluck('id')
+                ->toArray();
+        } else {
+            $this->selectedInvoices = [];
+        }
+    }
+
     public function stamp($invoiceId)
     {
         try {
             $invoice = \App\Models\Invoice::findOrFail($invoiceId);
+
+            if (!auth()->user()->hasRole('super admin') && $invoice->user->school_id !== auth()->user()->school_id) {
+                session()->flash('error', 'You do not have permission to stamp this invoice.');
+                return;
+            }
 
             // Get the original PDF path
             $originalPdfPath = storage_path('app/public/' . $invoice->invoice_file);
@@ -89,9 +125,43 @@ new class extends Component {
             }
 
             $this->dispatch('invoice-stamped');
-            session()->flash('success', 'Invoice stamped successfully and notification sent to student!');
         } catch (\Exception $e) {
-            session()->flash('error', 'Error stamping invoice: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function bulkStamp()
+    {
+        if (empty($this->selectedInvoices)) {
+            session()->flash('error', 'Please select at least one invoice to stamp');
+            return;
+        }
+
+        $successCount = 0;
+        $errorCount = 0;
+        $errors = [];
+
+        foreach ($this->selectedInvoices as $invoiceId) {
+            try {
+                $this->stamp($invoiceId);
+                $successCount++;
+            } catch (\Exception $e) {
+                $errorCount++;
+                $errors[] = "Invoice ID {$invoiceId}: " . $e->getMessage();
+            }
+        }
+
+        // Clear selection after bulk operation
+        $this->selectedInvoices = [];
+        $this->selectAll = false;
+
+        // Flash appropriate message
+        if ($successCount > 0 && $errorCount === 0) {
+            session()->flash('success', "Successfully stamped {$successCount} invoice(s) and sent notifications!");
+        } elseif ($successCount > 0 && $errorCount > 0) {
+            session()->flash('warning', "Stamped {$successCount} invoice(s) successfully, but {$errorCount} failed. Errors: " . implode('; ', $errors));
+        } else {
+            session()->flash('error', "Failed to stamp all invoices. Errors: " . implode('; ', $errors));
         }
     }
 }; ?>
@@ -101,14 +171,30 @@ new class extends Component {
         <div class="fixed inset-0 -z-10 overflow-hidden">
             <div
                 class="absolute inset-0 bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-neutral-950 dark:to-neutral-900">
-                {{-- <x-floating-icons /> --}}
             </div>
         </div>
         @include('includes.alert')
 
         <div class="max-w-7xl mx-auto mb-8">
-            <h2 class="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">Fees
-                Documents</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200">Fees Documents</h2>
+                
+                @if (count($selectedInvoices) > 0)
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-zinc-600 dark:text-zinc-400">
+                            {{ count($selectedInvoices) }} selected
+                        </span>
+                        <flux:button wire:click="bulkStamp"
+                            class="px-4 py-2 !bg-green-500 !text-white rounded !hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Stamp Selected ({{ count($selectedInvoices) }})
+                        </flux:button>
+                    </div>
+                @endif
+            </div>
+
             <div class="flex flex-col sm:flex-row gap-4 mb-8">
                 <input wire:model.live="search" type="text" placeholder="Search by RRR number..."
                     class="w-full sm:w-auto px-4 py-2 border rounded-lg bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
@@ -125,13 +211,32 @@ new class extends Component {
 
                 <input wire:model.live="endDate" type="date"
                     class="w-full sm:w-auto px-4 py-2 border rounded-lg bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
+
+                @if ($invoices->where('status', 'pending')->count() > 0)
+                    <label class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 rounded-lg border dark:border-zinc-700 cursor-pointer">
+                        <input type="checkbox" wire:model.live="selectAll"
+                            class="rounded border-zinc-300 dark:border-zinc-600 text-green-500 focus:ring-green-500">
+                        <span class="text-sm text-zinc-700 dark:text-zinc-300">Select All Pending</span>
+                    </label>
+                @endif
             </div>
         </div>
 
         <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             @forelse ($invoices as $invoice)
-                <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
-                    <x-admin-pdf-viewer :invoice-id="$invoice->id" :invoice-file="$invoice->invoice_file" :status="$invoice->status" buttonText="" />
+                <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 relative">
+                    @if ($invoice->status === 'pending')
+                        <div class="absolute top-2 left-2 z-10">
+                            <input type="checkbox" wire:model.live="selectedInvoices" value="{{ $invoice->id }}"
+                                class="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-green-500 focus:ring-green-500 cursor-pointer">
+                        </div>
+                    @endif
+
+                    @if ($invoice->status === 'stamped')
+                        <x-stamped-pdf-viewer :invoice-id="$invoice->id" :invoice-file="$invoice->stamped_file" :status="$invoice->status" buttonText="" />
+                    @else
+                        <x-admin-pdf-viewer :invoice-id="$invoice->id" :invoice-file="$invoice->invoice_file" :status="$invoice->status" buttonText="" />
+                    @endif
 
                     <div class="mt-4 space-y-2 text-sm">
                         <div class="flex justify-between items-center relative group">
@@ -169,7 +274,7 @@ new class extends Component {
                 </div>
             @empty
                 <div class="col-span-full text-center py-12 text-zinc-500 dark:text-zinc-400">
-                    No igr documents found
+                    No receipt found
                 </div>
             @endforelse
         </div>

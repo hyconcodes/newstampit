@@ -85,6 +85,11 @@
                     :current="request()->routeIs('invoice.upload')" wire:navigate>
                     {{ __('Upload Invoices') }}
                 </flux:navlist.item>
+
+                <flux:navlist.item icon="document-text" :href="route('student.pending.invoices')" 
+                    :current="request()->routeIs('student.pending.invoices')" wire:navigate>
+                    {{ __('Pending Invoices') }}
+                </flux:navlist.item>
                 
                 <flux:navlist.item icon="document-check" :href="route('student.stamped-documents')" 
                     :current="request()->routeIs('student.stamped-documents')" wire:navigate>

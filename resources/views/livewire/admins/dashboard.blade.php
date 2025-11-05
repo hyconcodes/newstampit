@@ -389,13 +389,13 @@
     <!-- Fee Type Distribution -->
     <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700">
         <div class="p-6 border-b border-zinc-200 dark:border-zinc-700">
-            <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">Invoice Distribution</h3>
+            <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">Receipt Distribution</h3>
             <p class="text-sm text-zinc-600 dark:text-zinc-400">Breakdown by fee type and status</p>
         </div>
         <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
                 <!-- School Fees -->
-                <div class="text-center">
+                <div class="text-center hidden">
                     <h4 class="text-lg font-medium text-zinc-900 dark:text-white mb-4">School Fees</h4>
                     <div class="space-y-2">
                         @php
@@ -420,7 +420,7 @@
 
                 <!-- IGR -->
                 <div class="text-center">
-                    <h4 class="text-lg font-medium text-zinc-900 dark:text-white mb-4">IGR</h4>
+                    <h4 class="text-lg font-medium text-zinc-900 dark:text-white mb-4">REMITA RECEIPTS</h4>
                     <div class="space-y-2">
                         @php
                             $igrTotal = \App\Models\Invoice::where('fee_type', 'igr')->count();

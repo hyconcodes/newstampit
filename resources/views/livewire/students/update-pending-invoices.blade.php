@@ -81,7 +81,7 @@ new class extends Component {
                             </label>
                             <select wire:model="fee_type" 
                                 class="w-full px-4 py-2 rounded-lg border bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700">
-                                <option value="school_fees">School Fee</option>
+                                {{-- <option value="school_fees">School Fee</option> --}}
                                 <option value="igr">IGR</option>
                             </select>
                             @error('fee_type') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
